@@ -2,6 +2,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { colors, fonts } from '@/theme';
+import { router } from 'expo-router';
 
 export default function WelcomeScreen() {
   return (
@@ -22,7 +23,7 @@ export default function WelcomeScreen() {
 
           <Pressable
             style={({ pressed }) => [styles.loginButton, pressed && styles.pressed]}
-            onPress={() => console.log('Iniciar Sesión pressed')}
+            onPress={() => router.push("/login")}
           >
             <Text style={styles.loginButtonText}>Iniciar sesión</Text>
           </Pressable>
@@ -33,7 +34,7 @@ export default function WelcomeScreen() {
 
           <Pressable
             style={({ pressed }) => [styles.createAccountButton, pressed && styles.pressed]}
-            onPress={() => console.log('Crear Cuenta pressed')}
+            onPress={() => router.push("/register")}
           >
             <Text style={styles.createAccountButtonText}>Registrate</Text>
           </Pressable>
