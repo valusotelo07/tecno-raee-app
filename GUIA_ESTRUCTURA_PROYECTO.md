@@ -1,6 +1,6 @@
 # Guía rápida de estructura del proyecto
 
-El proyecto usa **Expo Router + React Native + TypeScript**.  
+El proyecto usa **Expo Router + React Native + TypeScript**.
 La idea principal es separar responsabilidades para evitar lógica, estilos y componentes duplicados.
 
 ```text
@@ -8,7 +8,7 @@ src/
 ├── app/          → pantallas y rutas
 ├── components/   → componentes reutilizables
 ├── hooks/        → hooks personalizados
-├── lib/          → servicios, Firebase, helpers y APIs
+├── services/          → servicios, Firebase, helpers y APIs
 ├── models/       → tipos e interfaces
 └── theme/        → colores, tipografías y otros tokens visuales
 ```
@@ -302,13 +302,13 @@ Esto evita definir estructuras diferentes para la misma entidad.
 La configuración y acceso a servicios externos va en:
 
 ```text
-src/lib/
+src/services/
 ```
 
 Por ejemplo:
 
 ```text
-src/lib/firebase.ts
+src/services/firebase.ts
 ```
 
 ```ts
@@ -319,7 +319,7 @@ export const db = ...
 Si existe lógica específica para dispositivos:
 
 ```text
-src/lib/devices.ts
+src/services/devices.ts
 ```
 
 ```ts
@@ -337,7 +337,7 @@ Pantalla
    ↓
 función de servicio
    ↓
-lib/
+services/
    ↓
 Firebase
 ```
@@ -402,7 +402,7 @@ export type Device = {
 ### Paso 2 — Servicio
 
 ```text
-src/lib/devices.ts
+src/services/devices.ts
 ```
 
 ```ts
@@ -438,7 +438,7 @@ La pantalla usa el servicio para obtener los datos y los componentes para mostra
 ```text
 models/device.ts
         ↓
-lib/devices.ts
+services/devices.ts
         ↓
 app/(app)/devices.tsx
         ↓
@@ -464,7 +464,7 @@ Ante una nueva implementación, usar esta guía:
 → hooks/
 
 ¿Habla con Firebase/API o es un helper?
-→ lib/
+→ services/
 
 ¿Define la estructura de un dato?
 → models/
