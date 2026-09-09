@@ -279,12 +279,7 @@ export type Device = {
   status: DeviceStatus;
 };
 
-export type DeviceStatus =
-  | 'received'
-  | 'classified'
-  | 'evaluated'
-  | 'reconditioned'
-  | 'final';
+export type DeviceStatus = 'received' | 'classified' | 'evaluated' | 'reconditioned' | 'final';
 ```
 
 Después puede importarse desde cualquier parte del proyecto:
