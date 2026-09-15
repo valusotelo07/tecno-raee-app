@@ -129,7 +129,7 @@ export default function LoginScreen() {
           {/* Olvidaste contraseña */}
           <Pressable
             style={styles.forgotPassword}
-            //onPress={() => router.push('/forgot-password')}
+            onPress={() => router.push('/forgot-password')}
             disabled={loading}
           >
             <Text style={styles.forgotPasswordText}>
