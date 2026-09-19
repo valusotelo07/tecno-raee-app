@@ -1,3 +1,4 @@
+import { updateRecoveredPassword } from '@/services/auth.service';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useState } from 'react';
@@ -15,56 +16,43 @@ import {
 
 export default function NewPasswordScreen() {
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] =
-    useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
-  const [showPassword, setShowPassword] =
-    useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-  const [showConfirmPassword, setShowConfirmPassword] =
-    useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   async function handleSavePassword() {
     if (!password) {
-      Alert.alert(
-        'Contraseña requerida',
-        'Ingresá tu nueva contraseña.'
-      );
+      Alert.alert('Contraseña requerida', 'Ingresá tu nueva contraseña.');
       return;
     }
 
     if (password.length < 6) {
-      Alert.alert(
-        'Contraseña demasiado corta',
-        'La contraseña debe tener al menos 6 caracteres.'
-      );
+      Alert.alert('Contraseña demasiado corta', 'La contraseña debe tener al menos 6 caracteres.');
       return;
     }
 
     if (password !== confirmPassword) {
-      Alert.alert(
-        'Las contraseñas no coinciden',
-        'Revisá las contraseñas e intentá nuevamente.'
-      );
+      Alert.alert('Las contraseñas no coinciden', 'Revisá las contraseñas e intentá nuevamente.');
       return;
     }
 
-    /*
-     * BE-0004:
-     *
-     * await updatePassword(password);
-     */
+    try {
+      await updateRecoveredPassword(password);
 
-    Alert.alert(
-      'Contraseña actualizada',
-      'Tu contraseña fue modificada correctamente.',
-      [
+      Alert.alert('Contraseña actualizada', 'Tu contraseña fue modificada correctamente.', [
         {
           text: 'Aceptar',
           onPress: () => router.replace('/login'),
         },
-      ]
-    );
+      ]);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'No pudimos actualizar la contraseña.';
+
+      Alert.alert('Error al actualizar la contraseña', message);
+    }
   }
 
   return (
@@ -78,20 +66,15 @@ export default function NewPasswordScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.screen}>
-          <Text style={styles.logo}>
-            TECNO RAEE
-          </Text>
+          <Text style={styles.logo}>TECNO RAEE</Text>
 
           <Text style={styles.description}>
-            Creá una nueva contraseña para recuperar el
-            acceso a tu cuenta.
+            Creá una nueva contraseña para recuperar el acceso a tu cuenta.
           </Text>
 
           {/* Nueva contraseña */}
           <View style={styles.passwordField}>
-            <Text style={styles.label}>
-              Nueva Contraseña
-            </Text>
+            <Text style={styles.label}>Nueva Contraseña</Text>
 
             <View style={styles.inputContainer}>
               <Ionicons
@@ -115,16 +98,10 @@ export default function NewPasswordScreen() {
 
               <Pressable
                 style={styles.eyeButton}
-                onPress={() =>
-                  setShowPassword(value => !value)
-                }
+                onPress={() => setShowPassword((value) => !value)}
               >
                 <Ionicons
-                  name={
-                    showPassword
-                      ? 'eye-outline'
-                      : 'eye-off-outline'
-                  }
+                  name={showPassword ? 'eye-outline' : 'eye-off-outline'}
                   size={25}
                   color="#000000"
                 />
@@ -134,9 +111,7 @@ export default function NewPasswordScreen() {
 
           {/* Confirmación */}
           <View style={styles.confirmPasswordField}>
-            <Text style={styles.label}>
-              Confirmar Contraseña
-            </Text>
+            <Text style={styles.label}>Confirmar Contraseña</Text>
 
             <View style={styles.inputContainer}>
               <Ionicons
@@ -161,18 +136,10 @@ export default function NewPasswordScreen() {
 
               <Pressable
                 style={styles.eyeButton}
-                onPress={() =>
-                  setShowConfirmPassword(
-                    value => !value
-                  )
-                }
+                onPress={() => setShowConfirmPassword((value) => !value)}
               >
                 <Ionicons
-                  name={
-                    showConfirmPassword
-                      ? 'eye-outline'
-                      : 'eye-off-outline'
-                  }
+                  name={showConfirmPassword ? 'eye-outline' : 'eye-off-outline'}
                   size={25}
                   color="#000000"
                 />
@@ -181,15 +148,10 @@ export default function NewPasswordScreen() {
           </View>
 
           <Pressable
-            style={({ pressed }) => [
-              styles.saveButton,
-              pressed && styles.pressed,
-            ]}
+            style={({ pressed }) => [styles.saveButton, pressed && styles.pressed]}
             onPress={handleSavePassword}
           >
-            <Text style={styles.saveButtonText}>
-              Guardar Contraseña
-            </Text>
+            <Text style={styles.saveButtonText}>Guardar Contraseña</Text>
           </Pressable>
         </View>
       </ScrollView>

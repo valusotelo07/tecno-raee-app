@@ -23,10 +23,7 @@ export default function LoginScreen() {
 
   async function handleLogin() {
     if (!email.trim() || !password) {
-      Alert.alert(
-        'Datos incompletos',
-        'Ingresá tu correo y contraseña.'
-      );
+      Alert.alert('Datos incompletos', 'Ingresá tu correo y contraseña.');
       return;
     }
 
@@ -37,10 +34,7 @@ export default function LoginScreen() {
 
       router.replace('/home');
     } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : 'No pudimos iniciar sesión.';
+      const message = error instanceof Error ? error.message : 'No pudimos iniciar sesión.';
 
       Alert.alert('Error al iniciar sesión', message);
     } finally {
@@ -59,27 +53,16 @@ export default function LoginScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.screen}>
-          <Text style={styles.logo}>
-            TECNO RAEE
-          </Text>
+          <Text style={styles.logo}>TECNO RAEE</Text>
 
-          <Text style={styles.subtitle}>
-            Accedé a tu cuenta
-          </Text>
+          <Text style={styles.subtitle}>Accedé a tu cuenta</Text>
 
           {/* Correo */}
           <View style={styles.emailField}>
-            <Text style={styles.label}>
-              Correo Electrónico
-            </Text>
+            <Text style={styles.label}>Correo Electrónico</Text>
 
             <View style={styles.inputContainer}>
-              <Ionicons
-                name="mail-outline"
-                size={25}
-                color="#000000"
-                style={styles.inputIcon}
-              />
+              <Ionicons name="mail-outline" size={25} color="#000000" style={styles.inputIcon} />
 
               <TextInput
                 style={styles.input}
@@ -98,9 +81,7 @@ export default function LoginScreen() {
 
           {/* Contraseña */}
           <View style={styles.passwordField}>
-            <Text style={styles.label}>
-              Contraseña
-            </Text>
+            <Text style={styles.label}>Contraseña</Text>
 
             <View style={styles.inputContainer}>
               <Ionicons
@@ -132,9 +113,7 @@ export default function LoginScreen() {
             onPress={() => router.push('/forgot-password')}
             disabled={loading}
           >
-            <Text style={styles.forgotPasswordText}>
-              ¿Olvidaste tu contraseña?
-            </Text>
+            <Text style={styles.forgotPasswordText}>¿Olvidaste tu contraseña?</Text>
           </Pressable>
 
           {/* Iniciar sesión */}
@@ -150,29 +129,20 @@ export default function LoginScreen() {
             {loading ? (
               <ActivityIndicator color="#FFFFFF" />
             ) : (
-              <Text style={styles.loginButtonText}>
-                Iniciar Sesión
-              </Text>
+              <Text style={styles.loginButtonText}>Iniciar Sesión</Text>
             )}
           </Pressable>
 
           {/* Crear cuenta */}
           <View style={styles.createAccountSection}>
-            <Text style={styles.createAccountLabel}>
-              ¿Todavía no tenés una cuenta?
-            </Text>
+            <Text style={styles.createAccountLabel}>¿Todavía no tenés una cuenta?</Text>
 
             <Pressable
-              style={({ pressed }) => [
-                styles.createAccountButton,
-                pressed && styles.pressed,
-              ]}
+              style={({ pressed }) => [styles.createAccountButton, pressed && styles.pressed]}
               onPress={() => router.push('/register')}
               disabled={loading}
             >
-              <Text style={styles.createAccountButtonText}>
-                Crear Cuenta
-              </Text>
+              <Text style={styles.createAccountButtonText}>Crear Cuenta</Text>
             </Pressable>
           </View>
         </View>

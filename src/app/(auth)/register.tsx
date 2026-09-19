@@ -23,49 +23,33 @@ export default function CreateAccountScreen() {
   const [confirmPassword, setConfirmPassword] = useState('');
 
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] =
-    useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [loading, setLoading] = useState(false);
 
   async function handleRegister() {
     if (!name.trim()) {
-      Alert.alert(
-        'Nombre requerido',
-        'Ingresá tu nombre.'
-      );
+      Alert.alert('Nombre requerido', 'Ingresá tu nombre.');
       return;
     }
 
     if (!email.trim()) {
-      Alert.alert(
-        'Correo requerido',
-        'Ingresá tu correo electrónico.'
-      );
+      Alert.alert('Correo requerido', 'Ingresá tu correo electrónico.');
       return;
     }
 
     if (!password) {
-      Alert.alert(
-        'Contraseña requerida',
-        'Ingresá una contraseña.'
-      );
+      Alert.alert('Contraseña requerida', 'Ingresá una contraseña.');
       return;
     }
 
     if (password.length < 6) {
-      Alert.alert(
-        'Contraseña demasiado corta',
-        'La contraseña debe tener al menos 6 caracteres.'
-      );
+      Alert.alert('Contraseña demasiado corta', 'La contraseña debe tener al menos 6 caracteres.');
       return;
     }
 
     if (password !== confirmPassword) {
-      Alert.alert(
-        'Las contraseñas no coinciden',
-        'Revisá las contraseñas e intentá nuevamente.'
-      );
+      Alert.alert('Las contraseñas no coinciden', 'Revisá las contraseñas e intentá nuevamente.');
       return;
     }
 
@@ -76,15 +60,9 @@ export default function CreateAccountScreen() {
 
       router.replace('/home');
     } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : 'No pudimos crear la cuenta.';
+      const message = error instanceof Error ? error.message : 'No pudimos crear la cuenta.';
 
-      Alert.alert(
-        'Error al crear la cuenta',
-        message
-      );
+      Alert.alert('Error al crear la cuenta', message);
     } finally {
       setLoading(false);
     }
@@ -101,27 +79,16 @@ export default function CreateAccountScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.screen}>
-          <Text style={styles.logo}>
-            TECNO RAEE
-          </Text>
+          <Text style={styles.logo}>TECNO RAEE</Text>
 
-          <Text style={styles.subtitle}>
-            Comenzá a reciclar
-          </Text>
+          <Text style={styles.subtitle}>Comenzá a reciclar</Text>
 
           {/* Nombre */}
           <View style={styles.nameField}>
-            <Text style={styles.label}>
-              Nombre
-            </Text>
+            <Text style={styles.label}>Nombre</Text>
 
             <View style={styles.inputContainer}>
-              <Ionicons
-                name="person-outline"
-                size={25}
-                color="#000000"
-                style={styles.inputIcon}
-              />
+              <Ionicons name="person-outline" size={25} color="#000000" style={styles.inputIcon} />
 
               <TextInput
                 style={styles.input}
@@ -138,17 +105,10 @@ export default function CreateAccountScreen() {
 
           {/* Correo */}
           <View style={styles.emailField}>
-            <Text style={styles.label}>
-              Correo Electrónico
-            </Text>
+            <Text style={styles.label}>Correo Electrónico</Text>
 
             <View style={styles.inputContainer}>
-              <Ionicons
-                name="mail-outline"
-                size={25}
-                color="#000000"
-                style={styles.inputIcon}
-              />
+              <Ionicons name="mail-outline" size={25} color="#000000" style={styles.inputIcon} />
 
               <TextInput
                 style={styles.input}
@@ -167,9 +127,7 @@ export default function CreateAccountScreen() {
 
           {/* Contraseña */}
           <View style={styles.passwordField}>
-            <Text style={styles.label}>
-              Contraseña
-            </Text>
+            <Text style={styles.label}>Contraseña</Text>
 
             <View style={styles.inputContainer}>
               <Ionicons
@@ -194,17 +152,11 @@ export default function CreateAccountScreen() {
 
               <Pressable
                 style={styles.eyeButton}
-                onPress={() =>
-                  setShowPassword(value => !value)
-                }
+                onPress={() => setShowPassword((value) => !value)}
                 disabled={loading}
               >
                 <Ionicons
-                  name={
-                    showPassword
-                      ? 'eye-outline'
-                      : 'eye-off-outline'
-                  }
+                  name={showPassword ? 'eye-outline' : 'eye-off-outline'}
                   size={25}
                   color="#000000"
                 />
@@ -214,9 +166,7 @@ export default function CreateAccountScreen() {
 
           {/* Confirmar contraseña */}
           <View style={styles.confirmPasswordField}>
-            <Text style={styles.label}>
-              Confirmar Contraseña
-            </Text>
+            <Text style={styles.label}>Confirmar Contraseña</Text>
 
             <View style={styles.inputContainer}>
               <Ionicons
@@ -242,17 +192,11 @@ export default function CreateAccountScreen() {
 
               <Pressable
                 style={styles.eyeButton}
-                onPress={() =>
-                  setShowConfirmPassword(value => !value)
-                }
+                onPress={() => setShowConfirmPassword((value) => !value)}
                 disabled={loading}
               >
                 <Ionicons
-                  name={
-                    showConfirmPassword
-                      ? 'eye-outline'
-                      : 'eye-off-outline'
-                  }
+                  name={showConfirmPassword ? 'eye-outline' : 'eye-off-outline'}
                   size={25}
                   color="#000000"
                 />
@@ -273,29 +217,20 @@ export default function CreateAccountScreen() {
             {loading ? (
               <ActivityIndicator color="#FFFFFF" />
             ) : (
-              <Text style={styles.createButtonText}>
-                Crear cuenta
-              </Text>
+              <Text style={styles.createButtonText}>Crear cuenta</Text>
             )}
           </Pressable>
 
           {/* Login */}
           <View style={styles.loginSection}>
-            <Text style={styles.loginLabel}>
-              ¿Ya tenés cuenta?
-            </Text>
+            <Text style={styles.loginLabel}>¿Ya tenés cuenta?</Text>
 
             <Pressable
-              style={({ pressed }) => [
-                styles.loginButton,
-                pressed && styles.pressed,
-              ]}
+              style={({ pressed }) => [styles.loginButton, pressed && styles.pressed]}
               onPress={() => router.replace('/login')}
               disabled={loading}
             >
-              <Text style={styles.loginButtonText}>
-                Iniciar Sesión
-              </Text>
+              <Text style={styles.loginButtonText}>Iniciar Sesión</Text>
             </Pressable>
           </View>
         </View>
