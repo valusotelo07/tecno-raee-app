@@ -23,7 +23,7 @@ export default function WelcomeScreen() {
 
           <Pressable
             style={({ pressed }) => [styles.loginButton, pressed && styles.pressed]}
-            onPress={() => router.push("/login")}
+            onPress={() => router.push('/login')}
           >
             <Text style={styles.loginButtonText}>Iniciar sesión</Text>
           </Pressable>
@@ -34,7 +34,7 @@ export default function WelcomeScreen() {
 
           <Pressable
             style={({ pressed }) => [styles.createAccountButton, pressed && styles.pressed]}
-            onPress={() => router.push("/register")}
+            onPress={() => router.push('/register')}
           >
             <Text style={styles.createAccountButtonText}>Registrate</Text>
           </Pressable>

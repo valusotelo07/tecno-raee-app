@@ -1,3 +1,4 @@
+import { sendRecoveryCode, verifyRecoveryCode } from '@/services/auth.service';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useRef, useState } from 'react';
@@ -14,6 +15,7 @@ import {
 } from 'react-native';
 
 const OTP_LENGTH = 6;
+const OTP_SLOTS = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth'] as const;
 
 export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState('');
@@ -26,83 +28,71 @@ export default function ForgotPasswordScreen() {
     const normalizedEmail = email.trim().toLowerCase();
 
     if (!normalizedEmail) {
-      Alert.alert(
-        'Correo requerido',
-        'Ingresá el correo asociado a tu cuenta.'
-      );
+      Alert.alert('Correo requerido', 'Ingresá el correo asociado a tu cuenta.');
       return;
     }
 
-    if (!normalizedEmail.includes('@')) {
-      Alert.alert(
-        'Correo inválido',
-        'Ingresá un correo electrónico válido.'
-      );
-      return;
+    try {
+      await sendRecoveryCode(normalizedEmail);
+
+      setCodeSent(true);
+
+      Alert.alert('Código enviado', 'Revisá tu correo electrónico.');
+
+      codeInputRef.current?.focus();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'No pudimos enviar el código.';
+
+      Alert.alert('Error al enviar el código', message);
     }
-
-    /*
-     * BE-0004:
-     *
-     * await sendRecoveryCode(normalizedEmail);
-     */
-
-    setCodeSent(true);
-
-    codeInputRef.current?.focus();
   }
 
   async function handleResendCode() {
-    if (!email.trim()) {
-      Alert.alert(
-        'Correo requerido',
-        'Ingresá primero tu correo electrónico.'
-      );
+    const normalizedEmail = email.trim().toLowerCase();
+
+    if (!normalizedEmail) {
+      Alert.alert('Correo requerido', 'Ingresá primero tu correo electrónico.');
       return;
     }
 
-    /*
-     * BE-0004:
-     *
-     * await sendRecoveryCode(email);
-     */
+    try {
+      await sendRecoveryCode(normalizedEmail);
 
-    setCode('');
-    setCodeSent(true);
+      setCode('');
 
-    codeInputRef.current?.focus();
+      Alert.alert('Código reenviado', 'Te enviamos un nuevo código.');
+
+      codeInputRef.current?.focus();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'No pudimos reenviar el código.';
+
+      Alert.alert('Error', message);
+    }
   }
 
   async function handleVerifyCode() {
     if (!codeSent) {
-      Alert.alert(
-        'Código no enviado',
-        'Primero solicitá un código de recuperación.'
-      );
+      Alert.alert('Código no enviado', 'Primero solicitá un código de recuperación.');
       return;
     }
 
-    if (code.length !== OTP_LENGTH) {
-      Alert.alert(
-        'Código incompleto',
-        'Ingresá los 6 dígitos del código.'
-      );
+    if (code.length !== 6) {
+      Alert.alert('Código incompleto', 'Ingresá los 6 dígitos del código.');
       return;
     }
 
-    /*
-     * BE-0004:
-     *
-     * await verifyRecoveryCode(email, code);
-     */
+    try {
+      await verifyRecoveryCode(email, code);
+      router.push('/new-password');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'El código ingresado no es válido.';
 
-    router.push('/new-password');
+      Alert.alert('Código incorrecto', message);
+    }
   }
 
   function handleCodeChange(value: string) {
-    const onlyNumbers = value
-      .replace(/\D/g, '')
-      .slice(0, OTP_LENGTH);
+    const onlyNumbers = value.replace(/\D/g, '').slice(0, OTP_LENGTH);
 
     setCode(onlyNumbers);
   }
@@ -118,13 +108,9 @@ export default function ForgotPasswordScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.screen}>
-          <Text style={styles.logo}>
-            TECNO RAEE
-          </Text>
+          <Text style={styles.logo}>TECNO RAEE</Text>
 
-          <Text style={styles.subtitle}>
-            Recuperá tu Contraseña
-          </Text>
+          <Text style={styles.subtitle}>Recuperá tu Contraseña</Text>
 
           <Text style={styles.description}>
             Ingresá el correo asociado a tu cuenta.{'\n'}
@@ -133,12 +119,7 @@ export default function ForgotPasswordScreen() {
 
           {/* Correo */}
           <View style={styles.emailContainer}>
-            <Ionicons
-              name="mail-outline"
-              size={25}
-              color="#000000"
-              style={styles.mailIcon}
-            />
+            <Ionicons name="mail-outline" size={25} color="#000000" style={styles.mailIcon} />
 
             <TextInput
               style={styles.emailInput}
@@ -153,50 +134,27 @@ export default function ForgotPasswordScreen() {
             />
 
             <Pressable
-              style={({ pressed }) => [
-                styles.sendButton,
-                pressed && styles.pressed,
-              ]}
+              style={({ pressed }) => [styles.sendButton, pressed && styles.pressed]}
               onPress={handleSendCode}
             >
-              <Text style={styles.sendButtonText}>
-                Enviar
-              </Text>
+              <Text style={styles.sendButtonText}>Enviar</Text>
             </Pressable>
           </View>
 
-          <Text style={styles.codeDescription}>
-            Ingresá el código que enviamos a tu correo.
-          </Text>
+          <Text style={styles.codeDescription}>Ingresá el código que enviamos a tu correo.</Text>
 
           {/* OTP */}
-          <Pressable
-            style={styles.otpContainer}
-            onPress={() => codeInputRef.current?.focus()}
-          >
-            {Array.from({ length: OTP_LENGTH }).map(
-              (_, index) => {
-                const digit = code[index] ?? '';
+          <Pressable style={styles.otpContainer} onPress={() => codeInputRef.current?.focus()}>
+            {OTP_SLOTS.map((slot, index) => {
+              const digit = code[index] ?? '';
+              const focused = index === code.length && code.length < OTP_LENGTH;
 
-                const focused =
-                  index === code.length &&
-                  code.length < OTP_LENGTH;
-
-                return (
-                  <View
-                    key={index}
-                    style={[
-                      styles.otpBox,
-                      focused && styles.otpBoxFocused,
-                    ]}
-                  >
-                    <Text style={styles.otpDigit}>
-                      {digit}
-                    </Text>
-                  </View>
-                );
-              }
-            )}
+              return (
+                <View key={slot} style={[styles.otpBox, focused && styles.otpBoxFocused]}>
+                  <Text style={styles.otpDigit}>{digit}</Text>
+                </View>
+              );
+            })}
 
             <TextInput
               ref={codeInputRef}
@@ -209,29 +167,17 @@ export default function ForgotPasswordScreen() {
             />
           </Pressable>
 
-          <Text style={styles.didNotReceive}>
-            ¿No recibiste el código?
-          </Text>
+          <Text style={styles.didNotReceive}>¿No recibiste el código?</Text>
 
-          <Pressable
-            style={styles.resendButton}
-            onPress={handleResendCode}
-          >
-            <Text style={styles.resendText}>
-              Reenviar código
-            </Text>
+          <Pressable style={styles.resendButton} onPress={handleResendCode}>
+            <Text style={styles.resendText}>Reenviar código</Text>
           </Pressable>
 
           <Pressable
-            style={({ pressed }) => [
-              styles.verifyButton,
-              pressed && styles.pressed,
-            ]}
+            style={({ pressed }) => [styles.verifyButton, pressed && styles.pressed]}
             onPress={handleVerifyCode}
           >
-            <Text style={styles.verifyButtonText}>
-              Verificar Código
-            </Text>
+            <Text style={styles.verifyButtonText}>Verificar Código</Text>
           </Pressable>
         </View>
       </ScrollView>
