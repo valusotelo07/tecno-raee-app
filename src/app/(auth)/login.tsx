@@ -1,4 +1,3 @@
-import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -10,11 +9,12 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from 'react-native';
 
+import { AuthTextField } from '@/components/auth/AuthTextField';
 import { login } from '@/services/auth.service';
+import { colors } from '@/theme';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -59,52 +59,35 @@ export default function LoginScreen() {
 
           {/* Correo */}
           <View style={styles.emailField}>
-            <Text style={styles.label}>Correo Electrónico</Text>
-
-            <View style={styles.inputContainer}>
-              <Ionicons name="mail-outline" size={25} color="#000000" style={styles.inputIcon} />
-
-              <TextInput
-                style={styles.input}
-                value={email}
-                onChangeText={setEmail}
-                placeholder="Ingresá tu correo"
-                placeholderTextColor="#000000"
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoCorrect={false}
-                autoComplete="email"
-                editable={!loading}
-              />
-            </View>
+            <AuthTextField
+              label="Correo Electrónico"
+              iconName="mail-outline"
+              value={email}
+              onChangeText={setEmail}
+              placeholder="Ingresá tu correo"
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoCorrect={false}
+              autoComplete="email"
+              editable={!loading}
+            />
           </View>
 
           {/* Contraseña */}
           <View style={styles.passwordField}>
-            <Text style={styles.label}>Contraseña</Text>
-
-            <View style={styles.inputContainer}>
-              <Ionicons
-                name="lock-closed-outline"
-                size={25}
-                color="#000000"
-                style={styles.inputIcon}
-              />
-
-              <TextInput
-                style={styles.input}
-                value={password}
-                onChangeText={setPassword}
-                placeholder="Ingresá tu contraseña"
-                placeholderTextColor="#000000"
-                secureTextEntry
-                autoCapitalize="none"
-                autoCorrect={false}
-                autoComplete="password"
-                editable={!loading}
-                onSubmitEditing={handleLogin}
-              />
-            </View>
+            <AuthTextField
+              label="Contraseña"
+              iconName="lock-closed-outline"
+              value={password}
+              onChangeText={setPassword}
+              placeholder="Ingresá tu contraseña"
+              secureTextEntry
+              autoCapitalize="none"
+              autoCorrect={false}
+              autoComplete="password"
+              editable={!loading}
+              onSubmitEditing={handleLogin}
+            />
           </View>
 
           {/* Olvidaste contraseña */}
@@ -127,7 +110,7 @@ export default function LoginScreen() {
             disabled={loading}
           >
             {loading ? (
-              <ActivityIndicator color="#FFFFFF" />
+              <ActivityIndicator color={colors.textOnPrimary} />
             ) : (
               <Text style={styles.loginButtonText}>Iniciar Sesión</Text>
             )}
@@ -154,12 +137,12 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
   },
 
   scrollContent: {
     flexGrow: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
   },
 
   screen: {
@@ -168,7 +151,7 @@ const styles = StyleSheet.create({
     maxWidth: 390,
     minHeight: 844,
     alignSelf: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
   },
 
   logo: {
@@ -181,7 +164,7 @@ const styles = StyleSheet.create({
     fontSize: 32,
     lineHeight: 39,
 
-    color: '#17823B',
+    color: colors.primary,
   },
 
   subtitle: {
@@ -196,7 +179,7 @@ const styles = StyleSheet.create({
     lineHeight: 19,
     textAlign: 'center',
 
-    color: '#17823B',
+    color: colors.primary,
   },
 
   emailField: {
@@ -213,50 +196,6 @@ const styles = StyleSheet.create({
     height: 76,
     left: 30,
     top: 326,
-  },
-
-  label: {
-    height: 24,
-
-    fontFamily: 'Inter',
-    fontWeight: '400',
-    fontSize: 14,
-    lineHeight: 17,
-
-    color: '#000000',
-  },
-
-  inputContainer: {
-    height: 52,
-    width: 326,
-
-    flexDirection: 'row',
-    alignItems: 'center',
-
-    backgroundColor: '#FFFFFF',
-
-    borderWidth: 1,
-    borderColor: '#D9D9D9',
-    borderRadius: 10,
-  },
-
-  inputIcon: {
-    marginLeft: 11,
-    marginRight: 10,
-  },
-
-  input: {
-    flex: 1,
-    height: '100%',
-
-    paddingVertical: 0,
-    paddingRight: 14,
-
-    fontFamily: 'Inter',
-    fontWeight: '400',
-    fontSize: 14,
-
-    color: '#000000',
   },
 
   forgotPassword: {
@@ -276,7 +215,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 17,
 
-    color: '#000000',
+    color: colors.text,
   },
 
   loginButton: {
@@ -286,7 +225,7 @@ const styles = StyleSheet.create({
     left: 32,
     top: 457,
 
-    backgroundColor: '#17823B',
+    backgroundColor: colors.primary,
     borderRadius: 12,
 
     alignItems: 'center',
@@ -299,7 +238,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 17,
 
-    color: '#FFFFFF',
+    color: colors.textOnPrimary,
   },
 
   createAccountSection: {
@@ -320,7 +259,7 @@ const styles = StyleSheet.create({
     lineHeight: 17,
     textAlign: 'center',
 
-    color: '#000000',
+    color: colors.text,
   },
 
   createAccountButton: {
@@ -331,10 +270,10 @@ const styles = StyleSheet.create({
     width: 326,
     height: 50,
 
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
 
     borderWidth: 1,
-    borderColor: '#17823B',
+    borderColor: colors.borderPrimary,
     borderRadius: 12,
 
     alignItems: 'center',
@@ -347,7 +286,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 17,
 
-    color: '#17823B',
+    color: colors.primary,
   },
 
   pressed: {

@@ -1,5 +1,3 @@
-import { sendRecoveryCode, verifyRecoveryCode } from '@/services/auth.service';
-import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useRef, useState } from 'react';
 import {
@@ -13,6 +11,10 @@ import {
   TextInput,
   View,
 } from 'react-native';
+
+import { AuthTextField } from '@/components/auth/AuthTextField';
+import { sendRecoveryCode, verifyRecoveryCode } from '@/services/auth.service';
+import { colors, fonts } from '@/theme';
 
 const OTP_LENGTH = 6;
 const OTP_SLOTS = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth'] as const;
@@ -119,26 +121,24 @@ export default function ForgotPasswordScreen() {
 
           {/* Correo */}
           <View style={styles.emailContainer}>
-            <Ionicons name="mail-outline" size={25} color="#000000" style={styles.mailIcon} />
-
-            <TextInput
-              style={styles.emailInput}
+            <AuthTextField
+              iconName="mail-outline"
               value={email}
               onChangeText={setEmail}
               placeholder="Ingresá tu correo"
-              placeholderTextColor="#000000"
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
               autoComplete="email"
+              trailing={
+                <Pressable
+                  style={({ pressed }) => [styles.sendButton, pressed && styles.pressed]}
+                  onPress={handleSendCode}
+                >
+                  <Text style={styles.sendButtonText}>Enviar</Text>
+                </Pressable>
+              }
             />
-
-            <Pressable
-              style={({ pressed }) => [styles.sendButton, pressed && styles.pressed]}
-              onPress={handleSendCode}
-            >
-              <Text style={styles.sendButtonText}>Enviar</Text>
-            </Pressable>
           </View>
 
           <Text style={styles.codeDescription}>Ingresá el código que enviamos a tu correo.</Text>
@@ -188,12 +188,12 @@ export default function ForgotPasswordScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
   },
 
   scrollContent: {
     flexGrow: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
   },
 
   screen: {
@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
     maxWidth: 390,
     minHeight: 844,
     alignSelf: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
   },
 
   logo: {
@@ -210,12 +210,12 @@ const styles = StyleSheet.create({
     left: 84,
     top: 107,
 
-    fontFamily: 'Inter',
+    fontFamily: fonts.bold,
     fontSize: 32,
     lineHeight: 39,
     fontWeight: '700',
 
-    color: '#17823B',
+    color: colors.primary,
   },
 
   subtitle: {
@@ -224,13 +224,13 @@ const styles = StyleSheet.create({
     left: 102,
     top: 158,
 
-    fontFamily: 'Inter',
+    fontFamily: fonts.regular,
     fontSize: 16,
     lineHeight: 19,
     fontWeight: '400',
     textAlign: 'center',
 
-    color: '#17823B',
+    color: colors.primary,
   },
 
   description: {
@@ -239,13 +239,13 @@ const styles = StyleSheet.create({
     left: 29,
     top: 271,
 
-    fontFamily: 'Inter',
+    fontFamily: fonts.regular,
     fontSize: 14,
     lineHeight: 17,
     fontWeight: '400',
     textAlign: 'center',
 
-    color: '#000000',
+    color: colors.text,
   },
 
   emailContainer: {
@@ -255,33 +255,6 @@ const styles = StyleSheet.create({
     top: 326,
 
     width: 326,
-    height: 52,
-
-    flexDirection: 'row',
-    alignItems: 'center',
-
-    backgroundColor: '#F7FAF8',
-
-    borderWidth: 1,
-    borderColor: '#D9D9D9',
-    borderRadius: 10,
-  },
-
-  mailIcon: {
-    marginLeft: 14,
-  },
-
-  emailInput: {
-    flex: 1,
-    height: '100%',
-
-    paddingHorizontal: 10,
-    paddingVertical: 0,
-
-    fontFamily: 'Inter',
-    fontSize: 14,
-
-    color: '#000000',
   },
 
   sendButton: {
@@ -294,15 +267,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
 
     borderRadius: 8,
-    backgroundColor: '#17823B',
+    backgroundColor: colors.primary,
   },
 
   sendButtonText: {
-    fontFamily: 'Inter',
+    fontFamily: fonts.regular,
     fontSize: 14,
     fontWeight: '400',
 
-    color: '#FFFFFF',
+    color: colors.textOnPrimary,
   },
 
   codeDescription: {
@@ -313,12 +286,12 @@ const styles = StyleSheet.create({
 
     width: 289,
 
-    fontFamily: 'Inter',
+    fontFamily: fonts.regular,
     fontSize: 14,
     lineHeight: 17,
     textAlign: 'center',
 
-    color: '#000000',
+    color: colors.text,
   },
 
   otpContainer: {
@@ -341,23 +314,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
 
-    backgroundColor: '#F7FAF8',
+    backgroundColor: colors.background,
 
     borderWidth: 1,
-    borderColor: '#D9D9D9',
+    borderColor: colors.border,
     borderRadius: 10,
   },
 
   otpBoxFocused: {
-    borderColor: '#17823B',
+    borderColor: colors.primary,
   },
 
   otpDigit: {
-    fontFamily: 'Inter',
+    fontFamily: fonts.regular,
     fontSize: 18,
     fontWeight: '500',
 
-    color: '#000000',
+    color: colors.text,
   },
 
   hiddenOtpInput: {
@@ -375,11 +348,11 @@ const styles = StyleSheet.create({
 
     width: 159,
 
-    fontFamily: 'Inter',
+    fontFamily: fonts.regular,
     fontSize: 14,
     lineHeight: 17,
 
-    color: '#000000',
+    color: colors.text,
   },
 
   resendButton: {
@@ -395,13 +368,13 @@ const styles = StyleSheet.create({
   },
 
   resendText: {
-    fontFamily: 'Inter',
+    fontFamily: fonts.bold,
     fontSize: 14,
     lineHeight: 17,
     fontWeight: '700',
     textAlign: 'center',
 
-    color: '#000000',
+    color: colors.text,
   },
 
   verifyButton: {
@@ -416,17 +389,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
 
-    backgroundColor: '#17823B',
+    backgroundColor: colors.primary,
     borderRadius: 12,
   },
 
   verifyButtonText: {
-    fontFamily: 'Inter',
+    fontFamily: fonts.semiBold,
     fontSize: 14,
     lineHeight: 17,
     fontWeight: '600',
 
-    color: '#FFFFFF',
+    color: colors.textOnPrimary,
   },
 
   pressed: {

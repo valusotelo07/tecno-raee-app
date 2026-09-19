@@ -1,6 +1,8 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { colors } from '@/theme';
+
 type Props = {
   variant?: 'dark' | 'light';
 };
@@ -10,7 +12,7 @@ export function Logo({ variant = 'dark' }: Readonly<Props>) {
 
   return (
     <View style={styles.container}>
-      <MaterialCommunityIcons name="recycle" size={34} color="#50B43C" />
+      <MaterialCommunityIcons name="recycle" size={34} color={colors.accent} />
 
       <Text style={[styles.text, light && styles.textLight]}>
         Tecno<Text style={styles.green}>RAEE</Text>
@@ -29,14 +31,14 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 25,
     fontWeight: '800',
-    color: '#10282C',
+    color: colors.brandDark,
   },
 
   textLight: {
-    color: '#FFFFFF',
+    color: colors.textOnPrimary,
   },
 
   green: {
-    color: '#50B43C',
+    color: colors.accent,
   },
 });
