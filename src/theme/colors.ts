@@ -5,6 +5,7 @@ export const colors = {
   // Backgrounds
   background: '#F7FAF8',
   surface: '#FFFFFF',
+  tabBarBackground: '#F0F0F0',
 
   // Text
   text: '#000000',
@@ -12,5 +13,6 @@ export const colors = {
   textOnPrimary: '#FFFFFF',
 
   // Borders
+  border: '#D9D9D9',
   borderPrimary: '#17823B',
 } as const;
