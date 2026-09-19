@@ -10,9 +10,11 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from 'react-native';
+
+import { AuthTextField } from '@/components/auth/AuthTextField';
+import { colors } from '@/theme';
 
 export default function NewPasswordScreen() {
   const [password, setPassword] = useState('');
@@ -74,77 +76,57 @@ export default function NewPasswordScreen() {
 
           {/* Nueva contraseña */}
           <View style={styles.passwordField}>
-            <Text style={styles.label}>Nueva Contraseña</Text>
-
-            <View style={styles.inputContainer}>
-              <Ionicons
-                name="lock-closed-outline"
-                size={25}
-                color="#000000"
-                style={styles.lockIcon}
-              />
-
-              <TextInput
-                style={styles.passwordInput}
-                value={password}
-                onChangeText={setPassword}
-                placeholder="Ingresá tu nueva contraseña"
-                placeholderTextColor="#000000"
-                secureTextEntry={!showPassword}
-                autoCapitalize="none"
-                autoCorrect={false}
-                autoComplete="new-password"
-              />
-
-              <Pressable
-                style={styles.eyeButton}
-                onPress={() => setShowPassword((value) => !value)}
-              >
-                <Ionicons
-                  name={showPassword ? 'eye-outline' : 'eye-off-outline'}
-                  size={25}
-                  color="#000000"
-                />
-              </Pressable>
-            </View>
+            <AuthTextField
+              label="Nueva Contraseña"
+              iconName="lock-closed-outline"
+              value={password}
+              onChangeText={setPassword}
+              placeholder="Ingresá tu nueva contraseña"
+              secureTextEntry={!showPassword}
+              autoCapitalize="none"
+              autoCorrect={false}
+              autoComplete="new-password"
+              trailing={
+                <Pressable
+                  style={styles.eyeButton}
+                  onPress={() => setShowPassword((value) => !value)}
+                >
+                  <Ionicons
+                    name={showPassword ? 'eye-outline' : 'eye-off-outline'}
+                    size={25}
+                    color={colors.text}
+                  />
+                </Pressable>
+              }
+            />
           </View>
 
           {/* Confirmación */}
           <View style={styles.confirmPasswordField}>
-            <Text style={styles.label}>Confirmar Contraseña</Text>
-
-            <View style={styles.inputContainer}>
-              <Ionicons
-                name="lock-closed-outline"
-                size={25}
-                color="#000000"
-                style={styles.lockIcon}
-              />
-
-              <TextInput
-                style={styles.passwordInput}
-                value={confirmPassword}
-                onChangeText={setConfirmPassword}
-                placeholder="Repetí tu nueva contraseña"
-                placeholderTextColor="#000000"
-                secureTextEntry={!showConfirmPassword}
-                autoCapitalize="none"
-                autoCorrect={false}
-                autoComplete="new-password"
-                onSubmitEditing={handleSavePassword}
-              />
-
-              <Pressable
-                style={styles.eyeButton}
-                onPress={() => setShowConfirmPassword((value) => !value)}
-              >
-                <Ionicons
-                  name={showConfirmPassword ? 'eye-outline' : 'eye-off-outline'}
-                  size={25}
-                  color="#000000"
-                />
-              </Pressable>
-            </View>
+            <AuthTextField
+              label="Confirmar Contraseña"
+              iconName="lock-closed-outline"
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+              placeholder="Repetí tu nueva contraseña"
+              secureTextEntry={!showConfirmPassword}
+              autoCapitalize="none"
+              autoCorrect={false}
+              autoComplete="new-password"
+              onSubmitEditing={handleSavePassword}
+              trailing={
+                <Pressable
+                  style={styles.eyeButton}
+                  onPress={() => setShowConfirmPassword((value) => !value)}
+                >
+                  <Ionicons
+                    name={showConfirmPassword ? 'eye-outline' : 'eye-off-outline'}
+                    size={25}
+                    color={colors.text}
+                  />
+                </Pressable>
+              }
+            />
           </View>
 
           <Pressable
@@ -162,12 +144,12 @@ export default function NewPasswordScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
   },
 
   scrollContent: {
     flexGrow: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
   },
 
   screen: {
@@ -177,7 +159,7 @@ const styles = StyleSheet.create({
     minHeight: 844,
     alignSelf: 'center',
 
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
   },
 
   logo: {
@@ -191,7 +173,7 @@ const styles = StyleSheet.create({
     fontSize: 32,
     lineHeight: 39,
 
-    color: '#17823B',
+    color: colors.primary,
   },
 
   description: {
@@ -208,7 +190,7 @@ const styles = StyleSheet.create({
     lineHeight: 19,
     textAlign: 'center',
 
-    color: '#17823B',
+    color: colors.primary,
   },
 
   passwordField: {
@@ -231,48 +213,6 @@ const styles = StyleSheet.create({
     height: 76,
   },
 
-  label: {
-    height: 24,
-
-    fontFamily: 'Inter',
-    fontWeight: '400',
-    fontSize: 14,
-    lineHeight: 17,
-
-    color: '#000000',
-  },
-
-  inputContainer: {
-    width: 326,
-    height: 52,
-
-    flexDirection: 'row',
-    alignItems: 'center',
-
-    backgroundColor: '#F7FAF8',
-
-    borderWidth: 1,
-    borderColor: '#D9D9D9',
-    borderRadius: 10,
-  },
-
-  lockIcon: {
-    marginLeft: 10,
-    marginRight: 10,
-  },
-
-  passwordInput: {
-    flex: 1,
-    height: '100%',
-
-    paddingVertical: 0,
-
-    fontFamily: 'Inter',
-    fontSize: 14,
-
-    color: '#000000',
-  },
-
   eyeButton: {
     width: 45,
     height: '100%',
@@ -293,7 +233,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
 
-    backgroundColor: '#17823B',
+    backgroundColor: colors.primary,
     borderRadius: 12,
   },
 
@@ -303,7 +243,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 17,
 
-    color: '#FFFFFF',
+    color: colors.textOnPrimary,
   },
 
   pressed: {
