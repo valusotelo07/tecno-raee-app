@@ -2,6 +2,19 @@ import type { User } from '@supabase/supabase-js';
 
 import { supabase } from '@/config/supabase';
 import { log } from '@/lib/logger';
+import type { RegisterInput } from '@/models/RegisterInput';
+
+function formatErrorValue(value: unknown) {
+  if (typeof value === 'string') {
+    return value;
+  }
+
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return 'Error no serializable';
+  }
+}
 
 function getErrorDetails(error: unknown) {
   if (error instanceof Error) {
@@ -24,10 +37,38 @@ function getErrorDetails(error: unknown) {
     };
   }
 
-  return { message: String(error) };
+  if (typeof error === 'object' && error !== null) {
+    const errorDetails = error as {
+      message?: unknown;
+      name?: unknown;
+      code?: unknown;
+      status?: unknown;
+      cause?: unknown;
+    };
+
+    return {
+      message: formatErrorValue(errorDetails.message ?? error),
+      name: typeof errorDetails.name === 'string' ? errorDetails.name : 'UnknownError',
+      code: errorDetails.code,
+      status: errorDetails.status,
+      cause: errorDetails.cause,
+    };
+  }
+
+  return { message: formatErrorValue(error) };
 }
 
-async function ensureProfile(user: User) {
+function getProfileFullName(user: User) {
+  const fullName = user.user_metadata.full_name;
+
+  if (typeof fullName === 'string' && fullName.trim()) {
+    return fullName.trim();
+  }
+
+  return user.email?.split('@')[0] ?? 'Usuario';
+}
+
+async function ensureProfile(user: User, fullName = getProfileFullName(user)) {
   if (!user.email) {
     throw new Error('El usuario no tiene un email asociado.');
   }
@@ -36,10 +77,12 @@ async function ensureProfile(user: User) {
     {
       id: user.id,
       email: user.email.toLowerCase(),
+      full_name: fullName.trim(),
       updated_at: new Date().toISOString(),
     },
     {
       onConflict: 'id',
+      ignoreDuplicates: true,
     }
   );
 
@@ -48,7 +91,7 @@ async function ensureProfile(user: User) {
   }
 }
 
-export async function register(name: string, email: string, password: string) {
+export async function register({ name, email, password }: Readonly<RegisterInput>) {
   const normalizedEmail = email.trim().toLowerCase();
 
   log.info('Auth: starting registration', { email: normalizedEmail });
@@ -72,7 +115,7 @@ export async function register(name: string, email: string, password: string) {
       throw new Error('No se pudo crear el usuario.');
     }
 
-    await ensureProfile(data.user);
+    await ensureProfile(data.user, name);
     log.info('Auth: registration completed', { userId: data.user.id });
 
     return data;
@@ -97,7 +140,13 @@ export async function login(email: string, password: string) {
       throw error;
     }
 
-    await ensureProfile(data.user);
+    try {
+      await ensureProfile(data.user);
+    } catch (profileError) {
+      await supabase.auth.signOut({ scope: 'local' });
+      throw profileError;
+    }
+
     log.info('Auth: login completed', { userId: data.user.id });
 
     return data;

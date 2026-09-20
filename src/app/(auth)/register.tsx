@@ -57,7 +57,7 @@ export default function CreateAccountScreen() {
     try {
       setLoading(true);
 
-      await register(name, email, password);
+      await register({ name, email, password });
 
       router.replace('/home');
     } catch (error) {

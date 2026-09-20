@@ -4,10 +4,10 @@ import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-nati
 
 import { ProfileImpactCard } from '@/components/profile/ProfileImpactCard';
 import { ProfileMenuItem } from '@/components/profile/ProfileMenuItem';
-import { logout } from '@/services/auth.service';
+import { useAuth } from '@/providers/AuthProvider';
 import { colors } from '@/theme';
 
-async function performLogout() {
+async function performLogout(logout: () => Promise<void>) {
   try {
     await logout();
 
@@ -19,7 +19,7 @@ async function performLogout() {
   }
 }
 
-function handleLogout() {
+function handleLogout(logout: () => Promise<void>) {
   Alert.alert('Cerrar sesión', '¿Querés cerrar tu sesión?', [
     {
       text: 'Cancelar',
@@ -28,20 +28,13 @@ function handleLogout() {
     {
       text: 'Cerrar sesión',
       style: 'destructive',
-      onPress: performLogout,
+      onPress: () => performLogout(logout),
     },
   ]);
 }
 
 export default function ProfileScreen() {
-  /*
-   * FE-0013:
-   * por ahora estos datos pueden quedar mockeados.
-   *
-   * Después podemos tomarlos de Supabase.
-   */
-  const userName = 'El Gato';
-  const email = 'elgato@gmail.com';
+  const { logout, profile } = useAuth();
 
   return (
     <ScrollView
@@ -57,11 +50,11 @@ export default function ProfileScreen() {
 
         <View style={styles.userInfo}>
           <Text style={styles.userName} numberOfLines={1}>
-            {userName}
+            {profile?.fullName ?? 'Usuario'}
           </Text>
 
           <Text style={styles.email} numberOfLines={1}>
-            {email}
+            {profile?.email ?? ''}
           </Text>
         </View>
 
@@ -106,7 +99,7 @@ export default function ProfileScreen() {
 
       <Pressable
         style={({ pressed }) => [styles.logoutButton, pressed && styles.pressed]}
-        onPress={handleLogout}
+        onPress={() => handleLogout(logout)}
       >
         <Ionicons name="log-out-outline" size={25} color={colors.danger} />
 

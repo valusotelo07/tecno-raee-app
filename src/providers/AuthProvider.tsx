@@ -1,12 +1,15 @@
 import type { Session, User } from '@supabase/supabase-js';
-import { createContext, type ReactNode, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
 import { supabase } from '@/config/supabase';
+import type { Profile } from '@/models/Profile';
 import { logout as logoutService } from '@/services/auth.service';
+import { getProfile } from '@/services/profile.service';
 
 type AuthContextValue = {
   session: Session | null;
   user: User | null;
+  profile: Profile | null;
   loading: boolean;
   logout: () => Promise<void>;
 };
@@ -23,11 +26,34 @@ async function logout() {
 
 export function AuthProvider({ children }: Readonly<AuthProviderProps>) {
   const [session, setSession] = useState<Session | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
 
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let mounted = true;
+
+    async function syncSession(currentSession: Session | null) {
+      try {
+        const currentProfile = currentSession ? await getProfile(currentSession.user.id) : null;
+
+        if (mounted) {
+          setSession(currentSession);
+          setProfile(currentProfile);
+        }
+      } catch (error) {
+        console.error('Error loading profile:', error);
+
+        if (mounted) {
+          setSession(currentSession);
+          setProfile(null);
+        }
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    }
 
     async function loadSession() {
       const {
@@ -39,19 +65,15 @@ export function AuthProvider({ children }: Readonly<AuthProviderProps>) {
         console.error('Error loading session:', error);
       }
 
-      if (mounted) {
-        setSession(currentSession);
-        setLoading(false);
-      }
+      await syncSession(currentSession);
     }
 
-    loadSession();
+    void loadSession();
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, newSession) => {
-      setSession(newSession);
-      setLoading(false);
+      void syncSession(newSession);
     });
 
     return () => {
@@ -64,10 +86,11 @@ export function AuthProvider({ children }: Readonly<AuthProviderProps>) {
     () => ({
       session,
       user: session?.user ?? null,
+      profile,
       loading,
       logout,
     }),
-    [session, loading]
+    [session, profile, loading]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
