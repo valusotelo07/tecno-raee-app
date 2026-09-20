@@ -107,6 +107,19 @@ export async function login(email: string, password: string) {
   }
 }
 
+export async function getCurrentSession() {
+  const {
+    data: { session },
+    error,
+  } = await supabase.auth.getSession();
+
+  if (error) {
+    throw error;
+  }
+
+  return session;
+}
+
 export async function logout() {
   const { error } = await supabase.auth.signOut({
     scope: 'local',
