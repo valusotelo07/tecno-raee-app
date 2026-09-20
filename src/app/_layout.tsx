@@ -1,5 +1,6 @@
 import { Stack } from 'expo-router';
 
+import { AuthProvider } from '@/providers/AuthProvider';
 import {
   Inter_400Regular,
   Inter_600SemiBold,
@@ -19,10 +20,12 @@ export default function RootLayout() {
   }
 
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-      }}
-    />
+    <AuthProvider>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+        }}
+      />
+    </AuthProvider>
   );
 }

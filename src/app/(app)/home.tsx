@@ -2,23 +2,18 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { QuickAccess } from '@/components/home/QuickAccess';
+import { useAuth } from '@/providers/AuthProvider';
 import { colors } from '@/theme';
 
 export default function HomeScreen() {
-  /*
-   * Por ahora puede quedar así para FE-0006.
-   *
-   * Después podemos obtenerlo desde la sesión/perfil:
-   * Walter -> Hola Walter,
-   */
-  const userName = 'Caste';
+  const { profile } = useAuth();
 
   return (
     <View style={styles.container}>
       <View style={styles.content}>
         <Text style={styles.logo}>TECNO RAEE</Text>
 
-        <Text style={styles.greeting}>Hola {userName},</Text>
+        <Text style={styles.greeting}>Hola {profile?.fullName ?? 'usuario'},</Text>
 
         <Text style={styles.question}>¿Qué querés hacer hoy?</Text>
 
