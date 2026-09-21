@@ -1,5 +1,5 @@
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { QuickAccess } from '@/components/home/QuickAccess';
 import { useAuth } from '@/providers/AuthProvider';
@@ -9,59 +9,61 @@ export default function HomeScreen() {
   const { profile } = useAuth();
 
   return (
-    <View style={styles.container}>
-      <View style={styles.content}>
-        <Text style={styles.logo}>TECNO RAEE</Text>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.content}
+      showsVerticalScrollIndicator={false}
+    >
+      <Text style={styles.logo}>TECNO RAEE</Text>
 
-        <Text style={styles.greeting}>Hola {profile?.fullName ?? 'usuario'},</Text>
+      <Text style={styles.greeting}>Hola {profile?.fullName ?? 'usuario'},</Text>
 
-        <Text style={styles.question}>¿Qué querés hacer hoy?</Text>
+      <Text style={styles.question}>¿Qué querés hacer hoy?</Text>
 
-        {/* Punto verde más cercano */}
-        <Pressable
-          style={({ pressed }) => [styles.nearestPoint, pressed && styles.pressed]}
-          // onPress={() => router.push('/green-points')}
-        >
-          <Ionicons name="location-outline" size={30} color={colors.primary} />
+      {/* Punto verde más cercano */}
+      <Pressable
+        style={({ pressed }) => [styles.nearestPoint, pressed && styles.pressed]}
+        // onPress={() => router.push('/green-points')}
+      >
+        <Ionicons name="location-outline" size={30} color={colors.primary} />
 
-          <View style={styles.nearestPointText}>
-            <Text style={styles.nearestTitle}>Punto verde más cercano:</Text>
+        <View style={styles.nearestPointText}>
+          <Text style={styles.nearestTitle}>Punto verde más cercano:</Text>
 
-            <Text style={styles.nearestName}>Ejemplo de lugar cercano</Text>
-          </View>
-
-          <Ionicons name="arrow-forward" size={28} color={colors.text} />
-        </Pressable>
-
-        <Text style={styles.quickTitle}>Accesos rápidos</Text>
-
-        <View style={styles.quickGrid}>
-          <QuickAccess
-            title={'Qué\nrecibimos'}
-            icon={<Ionicons name="hardware-chip-outline" size={26} color={colors.text} />}
-            onPress={() => {}}
-          />
-
-          <QuickAccess
-            title={'Puntos\nVerdes'}
-            icon={<Ionicons name="location-outline" size={27} color={colors.text} />}
-            onPress={() => {}}
-          />
-
-          <QuickAccess
-            title={'Registrar\nEntrega'}
-            icon={<Ionicons name="clipboard-outline" size={27} color={colors.text} />}
-            onPress={() => {}}
-          />
-
-          <QuickAccess
-            title={'Solicitar\nRetiro'}
-            icon={<MaterialCommunityIcons name="truck-outline" size={27} color={colors.text} />}
-            onPress={() => {}}
-          />
+          <Text style={styles.nearestName}>Ejemplo de lugar cercano</Text>
         </View>
+
+        <Ionicons name="arrow-forward" size={28} color={colors.text} />
+      </Pressable>
+
+      <Text style={styles.quickTitle}>Accesos rápidos</Text>
+
+      <View style={styles.quickGrid}>
+        <QuickAccess
+          title={'Qué\nrecibimos'}
+          icon={<Ionicons name="hardware-chip-outline" size={26} color={colors.text} />}
+          onPress={() => {}}
+        />
+
+        <QuickAccess
+          title={'Puntos\nVerdes'}
+          icon={<Ionicons name="location-outline" size={27} color={colors.text} />}
+          onPress={() => {}}
+        />
+
+        <QuickAccess
+          title={'Registrar\nEntrega'}
+          icon={<Ionicons name="clipboard-outline" size={27} color={colors.text} />}
+          onPress={() => {}}
+        />
+
+        <QuickAccess
+          title={'Solicitar\nRetiro'}
+          icon={<MaterialCommunityIcons name="truck-outline" size={27} color={colors.text} />}
+          onPress={() => {}}
+        />
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -72,10 +74,11 @@ const styles = StyleSheet.create({
   },
 
   content: {
-    flex: 1,
+    flexGrow: 1,
     width: '100%',
     maxWidth: 390,
     alignSelf: 'center',
+    paddingBottom: 24,
   },
 
   logo: {
