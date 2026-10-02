@@ -1,5 +1,7 @@
 # TecnoRAEE
 
+La descripción funcional del proyecto, los recorridos por rol y los pendientes están en [Proyecto y funcionalidades](PROYECTO_Y_FEATURES.md).
+
 Aplicación de gestión de RAEE con React Native, Expo SDK 57, Expo Router, TypeScript y Supabase. El código activo está en `src/app/`; servicios en `src/services/`, modelos en `src/models/` y estilos compartidos en `src/theme/`.
 
 Se implementaron las fundaciones del Sprint 1, el descubrimiento del Sprint 2, los portales reales de empresa/admin y las entregas del Sprint 5: registro, QR, recepción física con cantidades ajustables, movimientos de puntos por empresa, XP global e historial. Conservan el estilo de Home/onboarding. Reportes: [Sprint 1](docs/implementation-sprint-1.md), [Sprint 2](docs/implementation-sprint-2.md), [Empresa y admin](docs/implementation-company-admin.md), [Panel admin e historial](docs/implementation-admin-changelog.md) y [Entregas con QR](docs/implementation-sprint-5.md).
