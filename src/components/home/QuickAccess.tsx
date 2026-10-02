@@ -11,6 +11,7 @@ type QuickAccessProps = {
 export function QuickAccess({ title, icon, onPress }: Readonly<QuickAccessProps>) {
   return (
     <Pressable
+      accessibilityRole="button"
       style={({ pressed }) => [styles.quickAccess, pressed && styles.pressed]}
       onPress={onPress}
     >
@@ -23,11 +24,11 @@ export function QuickAccess({ title, icon, onPress }: Readonly<QuickAccessProps>
 
 const styles = StyleSheet.create({
   quickAccess: {
-    width: 165,
+    width: '48%',
     height: 100,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 19,
+    paddingHorizontal: 12,
     backgroundColor: colors.background,
     borderWidth: 1,
     borderColor: colors.primary,
@@ -43,7 +44,7 @@ const styles = StyleSheet.create({
   quickText: {
     flex: 1,
     marginLeft: 14,
-    fontFamily: 'Inter',
+    fontFamily: 'Inter_600SemiBold',
     fontSize: 16,
     fontWeight: '500',
     textAlign: 'center',

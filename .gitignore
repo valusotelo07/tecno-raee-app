@@ -4,6 +4,12 @@
 node_modules/
 package-lock.json
 
+# Local implementation reports and tests
+/docs/
+/tests/
+/supabase/tests/
+/supabase/migrations/
+
 # Expo
 .expo/
 dist/

@@ -27,6 +27,7 @@ export function AuthTextField({
         <Ionicons name={iconName} size={25} color={colors.text} style={styles.inputIcon} />
 
         <TextInput
+          accessibilityLabel={label}
           style={[styles.input, style]}
           placeholderTextColor={colors.text}
           {...inputProps}
@@ -49,7 +50,7 @@ const styles = StyleSheet.create({
 
   inputContainer: {
     height: 52,
-    width: 326,
+    width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.surface,

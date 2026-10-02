@@ -1,5 +1,3 @@
-import type { User } from '@supabase/supabase-js';
-
 import { supabase } from '@/config/supabase';
 import { log } from '@/lib/logger';
 import type { RegisterInput } from '@/models/RegisterInput';
@@ -58,39 +56,6 @@ function getErrorDetails(error: unknown) {
   return { message: formatErrorValue(error) };
 }
 
-function getProfileFullName(user: User) {
-  const fullName = user.user_metadata.full_name;
-
-  if (typeof fullName === 'string' && fullName.trim()) {
-    return fullName.trim();
-  }
-
-  return user.email?.split('@')[0] ?? 'Usuario';
-}
-
-async function ensureProfile(user: User, fullName = getProfileFullName(user)) {
-  if (!user.email) {
-    throw new Error('El usuario no tiene un email asociado.');
-  }
-
-  const { error } = await supabase.from('profiles').upsert(
-    {
-      id: user.id,
-      email: user.email.toLowerCase(),
-      full_name: fullName.trim(),
-      updated_at: new Date().toISOString(),
-    },
-    {
-      onConflict: 'id',
-      ignoreDuplicates: true,
-    }
-  );
-
-  if (error) {
-    throw error;
-  }
-}
-
 export async function register({ name, email, password }: Readonly<RegisterInput>) {
   const normalizedEmail = email.trim().toLowerCase();
 
@@ -115,7 +80,6 @@ export async function register({ name, email, password }: Readonly<RegisterInput
       throw new Error('No se pudo crear el usuario.');
     }
 
-    await ensureProfile(data.user, name);
     log.info('Auth: registration completed', { userId: data.user.id });
 
     return data;
@@ -138,13 +102,6 @@ export async function login(email: string, password: string) {
 
     if (error) {
       throw error;
-    }
-
-    try {
-      await ensureProfile(data.user);
-    } catch (profileError) {
-      await supabase.auth.signOut({ scope: 'local' });
-      throw profileError;
     }
 
     log.info('Auth: login completed', { userId: data.user.id });
@@ -268,20 +225,6 @@ export async function updateRecoveredPassword(password: string) {
     throw error;
   }
 
-  /*
-   * verifyOtp() creó una sesión para poder modificar
-   * la contraseña.
-   *
-   * Como nuestro flujo termina volviendo al Login,
-   * eliminamos únicamente esa sesión local.
-   */
-  const { error: signOutError } = await supabase.auth.signOut({
-    scope: 'local',
-  });
-
-  if (signOutError) {
-    throw signOutError;
-  }
-
+  // Keep the verified session so recovery can finish at the account's home.
   return data;
 }
