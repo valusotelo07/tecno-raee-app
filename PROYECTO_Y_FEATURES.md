@@ -171,10 +171,12 @@ src/services/     Acceso a Auth, datos, archivos y comandos
 src/providers/    Estado compartido de sesión y descubrimiento
 src/hooks/        Carga de datos y ejecución de acciones
 src/theme/        Colores, fuentes y estilos del producto
-supabase/         Configuración, migraciones y funciones
+supabase/         Configuración y funciones
 ```
 
 Los roles se leen desde asignaciones confiables de la base, nunca desde metadatos editables del usuario. Las credenciales privilegiadas del backend no forman parte del cliente. La documentación legal privada se mantiene separada de los datos públicos de descubrimiento.
+
+Las migraciones del esquema se mantienen localmente y no se incluyen en esta branch.
 
 ## Ejecución y validación
 

@@ -21,7 +21,7 @@ Para dispositivos: `npm run android` / `npm run ios`. La configuración conserva
 
 El mapa web usa Leaflet/OpenStreetMap, con atribución y carga diferida compatible con renderizado estático. Android/iOS usan `react-native-maps`. Expo Go no requiere una clave propia; para un build Android configurar `GOOGLE_MAPS_ANDROID_API_KEY` restringida a la app y su SHA-1. iOS usa Apple Maps. La ubicación se solicita sólo al tocar el botón y permanece en memoria; la búsqueda funciona sin habilitarla. Las distancias son en línea recta.
 
-## Supabase local y migración
+## Supabase local
 
 Con Docker disponible, iniciar el stack mínimo usado en las pruebas:
 
@@ -30,26 +30,13 @@ npx supabase start --exclude realtime,storage-api,imgproxy,mailpit,postgres-meta
 npx supabase status
 ```
 
-Puertos de TecnoRAEE: API 55321 y PostgreSQL 55322. Los archivos de migración coinciden con el historial remoto:
-
-- `20260909162544_create_profiles_and_rls.sql`
-- `20260930131644_foundations.sql`
-- `20260930131934_secure_profile_trigger.sql`
-- `20260930135013_public_discovery.sql`
-- `20260930154245_company_admin_portals.sql`
-- `20260930160754_portal_validation_and_email_throttle.sql`
-- `20260930161036_fix_portal_status_commands.sql`
-- `20260930164550_deliveries_qr_ledger.sql`
-- `20260930170631_serialize_delivery_registration.sql`
-- `20260930213235_admin_changelog.sql`
+Puertos de TecnoRAEE: API 55321 y PostgreSQL 55322. Las migraciones se conservan localmente y no se incluyen en esta branch. Para reproducir el esquema en otro entorno se necesitan esos archivos por separado.
 
 Se preserva `profiles` y su trigger. Las tablas nuevas tienen RLS y grants explícitos. La función del trigger no se puede invocar directamente desde la API pública. Los comandos de empresa/admin verifican los permisos en DB y ejecutan cambios relacionados en una transacción. Las invitaciones usan la Edge Function `company-invitation`, desplegada en el remoto y autenticada dentro de la función.
 
 Para usar documentación/invitaciones/fotos localmente se necesita Storage, Mailpit y Edge Runtime; el stack mínimo del comando anterior sólo cubre Auth/DB. Las URLs de retorno de Auth e invitaciones deben configurarse para el entorno de despliegue.
 
 Registrar una entrega requiere una cuenta con email confirmado y un punto publicado por una empresa activa. Crear el QR no acredita puntos: owner o worker debe confirmar la recepción desde `/company/scanner`. Se permite ingresar el código manualmente, sin cámara. Fotos opcionales privadas, JPG/PNG hasta 5 MB; el QR vence en 7 días. Mis RAEE y Perfil muestran saldos reales por empresa y XP global.
-
-Si ya existía la base local de pruebas de la implementación inicial, regenerarla con `npx supabase db reset --local` después de iniciar Docker. El cambio de numeración refleja los timestamps registrados al aplicar las migraciones en Supabase remoto.
 
 Copiar `.env.example` a `.env.local` y reemplazar la key por la **publishable key local** para conectar la app a ese stack. Reiniciar Expo después de cambiar esas variables. Nunca colocar secret keys o service_role en EXPO_PUBLIC ni en el cliente.
 

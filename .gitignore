@@ -8,6 +8,7 @@ package-lock.json
 /docs/
 /tests/
 /supabase/tests/
+/supabase/migrations/
 
 # Expo
 .expo/
