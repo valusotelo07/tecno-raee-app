@@ -171,9 +171,7 @@ src/services/     Acceso a Auth, datos, archivos y comandos
 src/providers/    Estado compartido de sesión y descubrimiento
 src/hooks/        Carga de datos y ejecución de acciones
 src/theme/        Colores, fuentes y estilos del producto
-supabase/         Configuración, migraciones, funciones y pruebas SQL
-tests/            Pruebas de dominio y servicios
-docs/             Reportes de implementación y validación
+supabase/         Configuración, migraciones y funciones
 ```
 
 Los roles se leen desde asignaciones confiables de la base, nunca desde metadatos editables del usuario. Las credenciales privilegiadas del backend no forman parte del cliente. La documentación legal privada se mantiene separada de los datos públicos de descubrimiento.
@@ -183,7 +181,7 @@ Los roles se leen desde asignaciones confiables de la base, nunca desde metadato
 El proyecto requiere Node 22.13 o posterior y npm.
 
 ```bash
-npm ci
+npm install
 npm run web
 # Para dispositivos: npm run android / npm run ios
 ```
@@ -195,13 +193,10 @@ Comprobaciones principales:
 ```bash
 npx tsc --noEmit
 npm run lint
-node --test tests/*.test.mjs
 npx expo export --platform web
-# Con Supabase local y Docker disponibles:
-npx supabase test db
 ```
 
-Los reportes del 30 de septiembre de 2026 documentan 33 pruebas locales y 221 comprobaciones SQL acumuladas: fundaciones, descubrimiento, portales, entregas e historial. También registran TypeScript, lint y exportación web aprobados, el circuito web ciudadano → empresa → acreditación y pruebas de permisos con rollback de fixtures.
+Las validaciones previas documentan TypeScript, lint y exportación web aprobados, el circuito web ciudadano → empresa → acreditación y comprobaciones de permisos con rollback de fixtures. Los reportes y archivos de pruebas se conservan localmente y no forman parte del contenido publicado en esta branch.
 
 Queda por validar en dispositivos físicos la lectura óptica, la selección de documentación/fotos y los recorridos nativos completos. Las exportaciones de bundles y una vista web móvil no sustituyen esas comprobaciones. La entrega de emails de invitación a la bandeja de una persona real no está documentada como verificada en esos reportes.
 

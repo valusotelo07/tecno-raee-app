@@ -4,14 +4,14 @@ La descripción funcional del proyecto, los recorridos por rol y los pendientes 
 
 Aplicación de gestión de RAEE con React Native, Expo SDK 57, Expo Router, TypeScript y Supabase. El código activo está en `src/app/`; servicios en `src/services/`, modelos en `src/models/` y estilos compartidos en `src/theme/`.
 
-Se implementaron las fundaciones del Sprint 1, el descubrimiento del Sprint 2, los portales reales de empresa/admin y las entregas del Sprint 5: registro, QR, recepción física con cantidades ajustables, movimientos de puntos por empresa, XP global e historial. Conservan el estilo de Home/onboarding. Reportes: [Sprint 1](docs/implementation-sprint-1.md), [Sprint 2](docs/implementation-sprint-2.md), [Empresa y admin](docs/implementation-company-admin.md), [Panel admin e historial](docs/implementation-admin-changelog.md) y [Entregas con QR](docs/implementation-sprint-5.md).
+Se implementaron las fundaciones del Sprint 1, el descubrimiento del Sprint 2, los portales reales de empresa/admin y las entregas del Sprint 5: registro, QR, recepción física con cantidades ajustables, movimientos de puntos por empresa, XP global e historial. Conservan el estilo de Home/onboarding.
 
 ## Ejecutar
 
 Requiere Node 22.13 o posterior y npm.
 
 ```powershell
-npm ci
+npm install
 npm run web
 ```
 
@@ -45,7 +45,7 @@ Puertos de TecnoRAEE: API 55321 y PostgreSQL 55322. Los archivos de migración c
 
 Se preserva `profiles` y su trigger. Las tablas nuevas tienen RLS y grants explícitos. La función del trigger no se puede invocar directamente desde la API pública. Los comandos de empresa/admin verifican los permisos en DB y ejecutan cambios relacionados en una transacción. Las invitaciones usan la Edge Function `company-invitation`, desplegada en el remoto y autenticada dentro de la función.
 
-Para pruebas locales de documentación/invitaciones/fotos se necesita Storage, Mailpit y Edge Runtime; el stack mínimo del comando anterior sólo cubre Auth/DB. Ver los reportes de portales y entregas para despliegue, URLs de retorno y límites de verificación.
+Para usar documentación/invitaciones/fotos localmente se necesita Storage, Mailpit y Edge Runtime; el stack mínimo del comando anterior sólo cubre Auth/DB. Las URLs de retorno de Auth e invitaciones deben configurarse para el entorno de despliegue.
 
 Registrar una entrega requiere una cuenta con email confirmado y un punto publicado por una empresa activa. Crear el QR no acredita puntos: owner o worker debe confirmar la recepción desde `/company/scanner`. Se permite ingresar el código manualmente, sin cámara. Fotos opcionales privadas, JPG/PNG hasta 5 MB; el QR vence en 7 días. Mis RAEE y Perfil muestran saldos reales por empresa y XP global.
 
@@ -60,8 +60,6 @@ Los roles de empresa/admin se asignan únicamente desde un backend seguro o DB a
 ```powershell
 npx tsc --noEmit
 npm run lint
-node --experimental-strip-types --test tests/*.test.mjs
-npx supabase test db
 npx supabase db advisors --local --type security --fail-on warn
 npx supabase db lint --local
 npx expo install --check
@@ -69,16 +67,7 @@ npx expo-doctor
 npx expo export --platform web
 ```
 
-La integración Auth/DB real usa exclusivamente el stack local:
-
-```powershell
-$localStatus = npx supabase status -o json | ConvertFrom-Json
-$env:TECNORAAE_TEST_URL = 'http://127.0.0.1:55321'
-$env:TECNORAAE_TEST_PUBLISHABLE_KEY = $localStatus.PUBLISHABLE_KEY
-node --test tests/local-auth.integration.mjs
-```
-
-La prueba crea y limpia sus propias identidades/empresa locales. Las pruebas RLS usan transacciones con rollback. No existen scripts npm `test` o `typecheck`: los comandos anteriores invocan las herramientas directamente.
+Los reportes de implementación y las suites de pruebas se conservan localmente y no se incluyen en esta branch. No existen scripts npm `test` o `typecheck`: los comandos anteriores invocan las herramientas directamente.
 
 ## Próximas etapas
 
