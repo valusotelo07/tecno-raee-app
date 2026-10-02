@@ -1,17 +1,18 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { ProfileImpactCard } from '@/components/profile/ProfileImpactCard';
 import { ProfileMenuItem } from '@/components/profile/ProfileMenuItem';
 import { useAuth } from '@/providers/AuthProvider';
 import { colors } from '@/theme';
+import { AccountRequired } from '@/components/auth/AccountRequired';
+import { DeliveryBalance } from '@/components/delivery/DeliveryBalance';
 
 async function performLogout(logout: () => Promise<void>) {
   try {
     await logout();
 
-    router.replace('/welcome');
+    router.replace('/');
   } catch (error) {
     const message = error instanceof Error ? error.message : 'No se pudo cerrar la sesión.';
 
@@ -20,6 +21,10 @@ async function performLogout(logout: () => Promise<void>) {
 }
 
 function handleLogout(logout: () => Promise<void>) {
+  if (Platform.OS === 'web') {
+    void performLogout(logout);
+    return;
+  }
   Alert.alert('Cerrar sesión', '¿Querés cerrar tu sesión?', [
     {
       text: 'Cancelar',
@@ -34,7 +39,8 @@ function handleLogout(logout: () => Promise<void>) {
 }
 
 export default function ProfileScreen() {
-  const { logout, profile } = useAuth();
+  const { logout, profile, session } = useAuth();
+  if (!session) return <AccountRequired title="Tu perfil" />;
 
   return (
     <ScrollView
@@ -61,7 +67,9 @@ export default function ProfileScreen() {
         <Ionicons name="chevron-forward" size={24} color={colors.text} />
       </View>
 
-      <ProfileImpactCard recycledCount={5} recoveredWeight="12 kg" />
+      <View style={{ padding: 16 }}>
+        <DeliveryBalance />
+      </View>
 
       <Text style={styles.sectionTitle}>Mi cuenta</Text>
 

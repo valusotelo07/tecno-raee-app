@@ -1,8 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Tabs } from 'expo-router';
+import { Tabs } from 'expo-router/js-tabs';
 import type { ColorValue } from 'react-native';
 
-import { colors } from '@/theme';
+import { colors, fonts } from '@/theme';
 
 type TabIconName =
   'home-outline' | 'map-outline' | 'clipboard-outline' | 'star-outline' | 'person-outline';
@@ -21,7 +21,7 @@ export default function AppLayout() {
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.text,
         tabBarLabelStyle: {
-          fontFamily: 'Inter',
+          fontFamily: fonts.regular,
           fontSize: 12,
         },
         tabBarStyle: {

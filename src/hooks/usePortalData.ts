@@ -1,0 +1,73 @@
+import { useCallback, useEffect, useRef, useState } from 'react';
+
+export function usePortalData<T>(loader: () => Promise<T>) {
+  const [result, setResult] = useState<{
+    loader: () => Promise<T>;
+    data: T | null;
+    error: string | null;
+  } | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const generation = useRef(0);
+  const load = useCallback(() => {
+    const current = ++generation.current;
+    return Promise.resolve()
+      .then(loader)
+      .then(
+        (data) => {
+          if (current === generation.current) setResult({ loader, data, error: null });
+        },
+        (e: unknown) => {
+          if (current === generation.current)
+            setResult({
+              loader,
+              data: null,
+              error: e instanceof Error ? e.message : 'No pudimos cargar los datos.',
+            });
+        }
+      )
+      .finally(() => {
+        if (current === generation.current) setRefreshing(false);
+      });
+  }, [loader]);
+  const invalidate = useCallback(() => {
+    generation.current++;
+  }, []);
+  useEffect(() => {
+    void load();
+    return invalidate;
+  }, [load, invalidate]);
+  const refresh = useCallback(async () => {
+    setRefreshing(true);
+    await load();
+  }, [load]);
+  const current = result?.loader === loader ? result : null;
+  return {
+    data: current?.data ?? null,
+    loading: !current || refreshing,
+    error: current?.error ?? null,
+    refresh,
+  };
+}
+export function usePortalAction() {
+  const lock = useRef(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+  async function run(action: () => Promise<void>, success = 'Cambios guardados.') {
+    if (lock.current) return;
+    lock.current = true;
+    setBusy(true);
+    setError(null);
+    setNotice(null);
+    try {
+      await action();
+      setNotice(success);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'No pudimos guardar los cambios.');
+    } finally {
+      lock.current = false;
+      setBusy(false);
+    }
+  }
+  return { busy, error, notice, run };
+}

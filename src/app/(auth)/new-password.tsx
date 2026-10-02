@@ -1,9 +1,9 @@
-import { updateRecoveredPassword } from '@/services/auth.service';
+import { useAuth } from '@/providers/AuthProvider';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import {
-  Alert,
+  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -14,9 +14,12 @@ import {
 } from 'react-native';
 
 import { AuthTextField } from '@/components/auth/AuthTextField';
-import { colors } from '@/theme';
+import { colors, fonts } from '@/theme';
 
 export default function NewPasswordScreen() {
+  const { completePasswordRecovery } = useAuth();
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
@@ -25,35 +28,34 @@ export default function NewPasswordScreen() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   async function handleSavePassword() {
+    if (saving) return;
+    setError(null);
     if (!password) {
-      Alert.alert('Contraseña requerida', 'Ingresá tu nueva contraseña.');
+      setError('Ingresá tu nueva contraseña.');
       return;
     }
 
     if (password.length < 6) {
-      Alert.alert('Contraseña demasiado corta', 'La contraseña debe tener al menos 6 caracteres.');
+      setError('La contraseña debe tener al menos 6 caracteres.');
       return;
     }
 
     if (password !== confirmPassword) {
-      Alert.alert('Las contraseñas no coinciden', 'Revisá las contraseñas e intentá nuevamente.');
+      setError('Las contraseñas no coinciden. Revisá e intentá nuevamente.');
       return;
     }
 
     try {
-      await updateRecoveredPassword(password);
-
-      Alert.alert('Contraseña actualizada', 'Tu contraseña fue modificada correctamente.', [
-        {
-          text: 'Aceptar',
-          onPress: () => router.replace('/login'),
-        },
-      ]);
+      setSaving(true);
+      await completePasswordRecovery(password);
+      router.replace('/');
     } catch (error) {
       const message =
         error instanceof Error ? error.message : 'No pudimos actualizar la contraseña.';
 
-      Alert.alert('Error al actualizar la contraseña', message);
+      setError(message);
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -86,8 +88,10 @@ export default function NewPasswordScreen() {
               autoCapitalize="none"
               autoCorrect={false}
               autoComplete="new-password"
+              editable={!saving}
               trailing={
                 <Pressable
+                  disabled={saving}
                   style={styles.eyeButton}
                   onPress={() => setShowPassword((value) => !value)}
                 >
@@ -113,9 +117,11 @@ export default function NewPasswordScreen() {
               autoCapitalize="none"
               autoCorrect={false}
               autoComplete="new-password"
+              editable={!saving}
               onSubmitEditing={handleSavePassword}
               trailing={
                 <Pressable
+                  disabled={saving}
                   style={styles.eyeButton}
                   onPress={() => setShowConfirmPassword((value) => !value)}
                 >
@@ -130,11 +136,22 @@ export default function NewPasswordScreen() {
           </View>
 
           <Pressable
+            accessibilityRole="button"
+            disabled={saving}
             style={({ pressed }) => [styles.saveButton, pressed && styles.pressed]}
             onPress={handleSavePassword}
           >
-            <Text style={styles.saveButtonText}>Guardar Contraseña</Text>
+            {saving ? (
+              <ActivityIndicator color={colors.textOnPrimary} />
+            ) : (
+              <Text style={styles.saveButtonText}>Guardar Contraseña</Text>
+            )}
           </Pressable>
+          {error && (
+            <Text accessibilityRole="alert" style={styles.error}>
+              {error}
+            </Text>
+          )}
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -168,7 +185,7 @@ const styles = StyleSheet.create({
     left: 84,
     top: 107,
 
-    fontFamily: 'Inter',
+    fontFamily: fonts.bold,
     fontWeight: '700',
     fontSize: 32,
     lineHeight: 39,
@@ -184,7 +201,7 @@ const styles = StyleSheet.create({
 
     width: 337,
 
-    fontFamily: 'Inter',
+    fontFamily: fonts.regular,
     fontWeight: '400',
     fontSize: 16,
     lineHeight: 19,
@@ -238,7 +255,7 @@ const styles = StyleSheet.create({
   },
 
   saveButtonText: {
-    fontFamily: 'Inter',
+    fontFamily: fonts.semiBold,
     fontWeight: '600',
     fontSize: 14,
     lineHeight: 17,
@@ -248,5 +265,15 @@ const styles = StyleSheet.create({
 
   pressed: {
     opacity: 0.75,
+  },
+  error: {
+    position: 'absolute',
+    left: 31,
+    top: 630,
+    width: 330,
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    lineHeight: 21,
+    color: colors.danger,
   },
 });

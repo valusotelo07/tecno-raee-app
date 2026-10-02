@@ -1,8 +1,7 @@
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -14,29 +13,39 @@ import {
 
 import { AuthTextField } from '@/components/auth/AuthTextField';
 import { login } from '@/services/auth.service';
-import { colors } from '@/theme';
+import { colors, fonts } from '@/theme';
+import { authRoute, parseAuthIntent } from '@/models/AuthFlow';
+import { useAuth } from '@/providers/AuthProvider';
 
 export default function LoginScreen() {
+  const params = useLocalSearchParams<{ intent?: string; confirm?: string }>();
+  const intent = parseAuthIntent(params.intent);
+  const { prepareAuth } = useAuth();
+  const [error, setError] = useState<string | null>(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
   async function handleLogin() {
+    if (loading) return;
+    setError(null);
     if (!email.trim() || !password) {
-      Alert.alert('Datos incompletos', 'Ingresá tu correo y contraseña.');
+      setError('Ingresá tu correo y contraseña.');
       return;
     }
 
     try {
       setLoading(true);
+      prepareAuth(intent);
 
       await login(email, password);
 
-      router.replace('/home');
+      router.replace('/');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'No pudimos iniciar sesión.';
 
-      Alert.alert('Error al iniciar sesión', message);
+      prepareAuth(null);
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -92,6 +101,7 @@ export default function LoginScreen() {
 
           {/* Olvidaste contraseña */}
           <Pressable
+            accessibilityRole="button"
             style={styles.forgotPassword}
             onPress={() => router.push('/forgot-password')}
             disabled={loading}
@@ -101,6 +111,7 @@ export default function LoginScreen() {
 
           {/* Iniciar sesión */}
           <Pressable
+            accessibilityRole="button"
             style={({ pressed }) => [
               styles.loginButton,
               pressed && styles.pressed,
@@ -116,13 +127,25 @@ export default function LoginScreen() {
             )}
           </Pressable>
 
+          {(error || params.confirm === '1') && (
+            <Text
+              accessibilityRole={error ? 'alert' : undefined}
+              accessibilityLiveRegion="polite"
+              style={[styles.feedback, error && styles.error]}
+            >
+              {error ||
+                'Revisá tu correo y confirmá la cuenta. Después iniciá sesión para continuar.'}
+            </Text>
+          )}
+
           {/* Crear cuenta */}
           <View style={styles.createAccountSection}>
             <Text style={styles.createAccountLabel}>¿Todavía no tenés una cuenta?</Text>
 
             <Pressable
+              accessibilityRole="button"
               style={({ pressed }) => [styles.createAccountButton, pressed && styles.pressed]}
-              onPress={() => router.push('/register')}
+              onPress={() => router.push(authRoute('/register', intent))}
               disabled={loading}
             >
               <Text style={styles.createAccountButtonText}>Crear Cuenta</Text>
@@ -135,6 +158,17 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
+  feedback: {
+    position: 'absolute',
+    top: 530,
+    left: 30,
+    width: 330,
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    lineHeight: 21,
+    color: colors.text,
+  },
+  error: { color: colors.danger },
   container: {
     flex: 1,
     backgroundColor: colors.surface,
@@ -159,7 +193,7 @@ const styles = StyleSheet.create({
     left: 84,
     top: 107,
 
-    fontFamily: 'Inter',
+    fontFamily: fonts.bold,
     fontWeight: '700',
     fontSize: 32,
     lineHeight: 39,
@@ -173,7 +207,7 @@ const styles = StyleSheet.create({
     left: 102,
     top: 162,
 
-    fontFamily: 'Inter',
+    fontFamily: fonts.regular,
     fontWeight: '400',
     fontSize: 16,
     lineHeight: 19,
@@ -210,7 +244,7 @@ const styles = StyleSheet.create({
   },
 
   forgotPasswordText: {
-    fontFamily: 'Inter',
+    fontFamily: fonts.regular,
     fontWeight: '400',
     fontSize: 14,
     lineHeight: 17,
@@ -233,7 +267,7 @@ const styles = StyleSheet.create({
   },
 
   loginButtonText: {
-    fontFamily: 'Inter',
+    fontFamily: fonts.semiBold,
     fontWeight: '600',
     fontSize: 14,
     lineHeight: 17,
@@ -253,7 +287,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 30,
 
-    fontFamily: 'Inter',
+    fontFamily: fonts.regular,
     fontWeight: '400',
     fontSize: 14,
     lineHeight: 17,
@@ -281,7 +315,7 @@ const styles = StyleSheet.create({
   },
 
   createAccountButtonText: {
-    fontFamily: 'Inter',
+    fontFamily: fonts.semiBold,
     fontWeight: '600',
     fontSize: 14,
     lineHeight: 17,

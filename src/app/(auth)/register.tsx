@@ -1,9 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -16,8 +15,14 @@ import {
 import { AuthTextField } from '@/components/auth/AuthTextField';
 import { colors } from '@/theme';
 import { register } from '@/services/auth.service';
+import { authRoute, parseAuthIntent } from '@/models/AuthFlow';
+import { useAuth } from '@/providers/AuthProvider';
 
 export default function CreateAccountScreen() {
+  const params = useLocalSearchParams<{ intent?: string }>();
+  const intent = parseAuthIntent(params.intent);
+  const { prepareAuth } = useAuth();
+  const [error, setError] = useState<string | null>(null);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -29,41 +34,51 @@ export default function CreateAccountScreen() {
   const [loading, setLoading] = useState(false);
 
   async function handleRegister() {
+    if (loading) return;
+    setError(null);
     if (!name.trim()) {
-      Alert.alert('Nombre requerido', 'Ingresá tu nombre.');
+      setError('Ingresá tu nombre.');
       return;
     }
 
     if (!email.trim()) {
-      Alert.alert('Correo requerido', 'Ingresá tu correo electrónico.');
+      setError('Ingresá tu correo electrónico.');
       return;
     }
 
     if (!password) {
-      Alert.alert('Contraseña requerida', 'Ingresá una contraseña.');
+      setError('Ingresá una contraseña.');
       return;
     }
 
     if (password.length < 6) {
-      Alert.alert('Contraseña demasiado corta', 'La contraseña debe tener al menos 6 caracteres.');
+      setError('La contraseña debe tener al menos 6 caracteres.');
       return;
     }
 
     if (password !== confirmPassword) {
-      Alert.alert('Las contraseñas no coinciden', 'Revisá las contraseñas e intentá nuevamente.');
+      setError('Las contraseñas no coinciden. Revisá e intentá nuevamente.');
       return;
     }
 
     try {
       setLoading(true);
+      prepareAuth(intent);
 
-      await register({ name, email, password });
-
-      router.replace('/home');
+      const { session } = await register({ name, email, password });
+      if (session) {
+        router.replace('/');
+      } else {
+        router.replace({
+          ...authRoute('/login', intent),
+          params: { ...(intent ? { intent } : {}), confirm: '1' },
+        });
+      }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'No pudimos crear la cuenta.';
 
-      Alert.alert('Error al crear la cuenta', message);
+      prepareAuth(null);
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -173,6 +188,12 @@ export default function CreateAccountScreen() {
             />
           </View>
 
+          {error && (
+            <Text accessibilityRole="alert" style={styles.error}>
+              {error}
+            </Text>
+          )}
+
           {/* Crear cuenta */}
           <Pressable
             style={({ pressed }) => [
@@ -196,7 +217,7 @@ export default function CreateAccountScreen() {
 
             <Pressable
               style={({ pressed }) => [styles.loginButton, pressed && styles.pressed]}
-              onPress={() => router.replace('/login')}
+              onPress={() => router.replace(authRoute('/login', intent))}
               disabled={loading}
             >
               <Text style={styles.loginButtonText}>Iniciar Sesión</Text>
@@ -223,7 +244,7 @@ const styles = StyleSheet.create({
     position: 'relative',
     width: '100%',
     maxWidth: 390,
-    minHeight: 844,
+    minHeight: 900,
     alignSelf: 'center',
 
     backgroundColor: colors.surface,
@@ -244,8 +265,8 @@ const styles = StyleSheet.create({
 
   subtitle: {
     position: 'absolute',
-    width: 197,
-    left: 102,
+    width: 330,
+    left: 30,
     top: 158,
 
     fontFamily: 'Inter',
@@ -302,7 +323,7 @@ const styles = StyleSheet.create({
     width: 326,
     height: 50,
     left: 32,
-    top: 629,
+    top: 683,
 
     backgroundColor: colors.primary,
     borderRadius: 12,
@@ -325,7 +346,7 @@ const styles = StyleSheet.create({
     width: 326,
     height: 74,
     left: 32,
-    top: 741,
+    top: 771,
   },
 
   loginLabel: {
@@ -374,5 +395,15 @@ const styles = StyleSheet.create({
 
   disabled: {
     opacity: 0.6,
+  },
+  error: {
+    position: 'absolute',
+    left: 30,
+    top: 619,
+    width: 330,
+    fontFamily: 'Inter',
+    fontSize: 14,
+    lineHeight: 20,
+    color: colors.danger,
   },
 });

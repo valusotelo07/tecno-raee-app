@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { useRef, useState } from 'react';
 import {
-  Alert,
+  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -23,73 +23,68 @@ export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
   const [codeSent, setCodeSent] = useState(false);
+  const [busy, setBusy] = useState<'send' | 'verify' | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const codeInputRef = useRef<TextInput>(null);
 
-  async function handleSendCode() {
+  async function handleSendCode(resend = false) {
+    if (busy) return;
+    setError(null);
+    setNotice(null);
     const normalizedEmail = email.trim().toLowerCase();
 
     if (!normalizedEmail) {
-      Alert.alert('Correo requerido', 'Ingresá el correo asociado a tu cuenta.');
+      setError('Ingresá el correo asociado a tu cuenta.');
       return;
     }
 
     try {
+      setBusy('send');
       await sendRecoveryCode(normalizedEmail);
 
       setCodeSent(true);
-
-      Alert.alert('Código enviado', 'Revisá tu correo electrónico.');
+      setCode('');
+      setNotice(
+        resend
+          ? 'Código reenviado. Revisá tu correo; también la carpeta de spam.'
+          : 'Código enviado. Revisá tu correo; también la carpeta de spam.'
+      );
 
       codeInputRef.current?.focus();
     } catch (error) {
       const message = error instanceof Error ? error.message : 'No pudimos enviar el código.';
 
-      Alert.alert('Error al enviar el código', message);
-    }
-  }
-
-  async function handleResendCode() {
-    const normalizedEmail = email.trim().toLowerCase();
-
-    if (!normalizedEmail) {
-      Alert.alert('Correo requerido', 'Ingresá primero tu correo electrónico.');
-      return;
-    }
-
-    try {
-      await sendRecoveryCode(normalizedEmail);
-
-      setCode('');
-
-      Alert.alert('Código reenviado', 'Te enviamos un nuevo código.');
-
-      codeInputRef.current?.focus();
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'No pudimos reenviar el código.';
-
-      Alert.alert('Error', message);
+      setError(message);
+    } finally {
+      setBusy(null);
     }
   }
 
   async function handleVerifyCode() {
+    if (busy) return;
+    setError(null);
     if (!codeSent) {
-      Alert.alert('Código no enviado', 'Primero solicitá un código de recuperación.');
+      setError('Primero solicitá un código de recuperación.');
       return;
     }
 
     if (code.length !== 6) {
-      Alert.alert('Código incompleto', 'Ingresá los 6 dígitos del código.');
+      setError('Ingresá los 6 dígitos del código.');
       return;
     }
 
     try {
+      setBusy('verify');
       await verifyRecoveryCode(email, code);
-      router.push('/new-password');
+      router.replace('/new-password');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'El código ingresado no es válido.';
 
-      Alert.alert('Código incorrecto', message);
+      setError(message);
+    } finally {
+      setBusy(null);
     }
   }
 
@@ -123,8 +118,16 @@ export default function ForgotPasswordScreen() {
           <View style={styles.emailContainer}>
             <AuthTextField
               iconName="mail-outline"
+              accessibilityLabel="Correo de recuperación"
               value={email}
-              onChangeText={setEmail}
+              editable={!busy}
+              onChangeText={(value) => {
+                setEmail(value);
+                setCodeSent(false);
+                setCode('');
+                setNotice(null);
+                setError(null);
+              }}
               placeholder="Ingresá tu correo"
               keyboardType="email-address"
               autoCapitalize="none"
@@ -132,15 +135,27 @@ export default function ForgotPasswordScreen() {
               autoComplete="email"
               trailing={
                 <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Enviar código"
+                  disabled={Boolean(busy)}
                   style={({ pressed }) => [styles.sendButton, pressed && styles.pressed]}
-                  onPress={handleSendCode}
+                  onPress={() => void handleSendCode()}
                 >
-                  <Text style={styles.sendButtonText}>Enviar</Text>
+                  {busy === 'send' ? (
+                    <ActivityIndicator color={colors.textOnPrimary} />
+                  ) : (
+                    <Text style={styles.sendButtonText}>Enviar</Text>
+                  )}
                 </Pressable>
               }
             />
           </View>
 
+          {notice && (
+            <Text accessibilityLiveRegion="polite" style={styles.notice}>
+              {notice}
+            </Text>
+          )}
           <Text style={styles.codeDescription}>Ingresá el código que enviamos a tu correo.</Text>
 
           {/* OTP */}
@@ -158,6 +173,10 @@ export default function ForgotPasswordScreen() {
 
             <TextInput
               ref={codeInputRef}
+              accessibilityLabel="Código de recuperación de 6 dígitos"
+              editable={codeSent && !busy}
+              autoComplete="one-time-code"
+              textContentType="oneTimeCode"
               style={styles.hiddenOtpInput}
               value={code}
               onChangeText={handleCodeChange}
@@ -169,16 +188,32 @@ export default function ForgotPasswordScreen() {
 
           <Text style={styles.didNotReceive}>¿No recibiste el código?</Text>
 
-          <Pressable style={styles.resendButton} onPress={handleResendCode}>
+          <Pressable
+            accessibilityRole="button"
+            disabled={!codeSent || Boolean(busy)}
+            style={[styles.resendButton, (!codeSent || busy) && styles.disabled]}
+            onPress={() => void handleSendCode(true)}
+          >
             <Text style={styles.resendText}>Reenviar código</Text>
           </Pressable>
 
           <Pressable
+            accessibilityRole="button"
+            disabled={Boolean(busy)}
             style={({ pressed }) => [styles.verifyButton, pressed && styles.pressed]}
             onPress={handleVerifyCode}
           >
-            <Text style={styles.verifyButtonText}>Verificar Código</Text>
+            {busy === 'verify' ? (
+              <ActivityIndicator color={colors.textOnPrimary} />
+            ) : (
+              <Text style={styles.verifyButtonText}>Verificar Código</Text>
+            )}
           </Pressable>
+          {error && (
+            <Text accessibilityRole="alert" style={styles.error}>
+              {error}
+            </Text>
+          )}
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -282,13 +317,13 @@ const styles = StyleSheet.create({
     position: 'absolute',
 
     left: 32,
-    top: 413,
+    top: 474,
 
-    width: 289,
+    width: 326,
 
     fontFamily: fonts.regular,
     fontSize: 14,
-    lineHeight: 17,
+    lineHeight: 20,
     textAlign: 'center',
 
     color: colors.text,
@@ -298,7 +333,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
 
     left: 29,
-    top: 439,
+    top: 538,
 
     width: 332,
     height: 52,
@@ -344,7 +379,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
 
     left: 28,
-    top: 505,
+    top: 604,
 
     width: 159,
 
@@ -359,7 +394,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
 
     left: 204,
-    top: 490,
+    top: 590,
 
     width: 98,
     height: 48,
@@ -381,7 +416,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
 
     left: 32,
-    top: 552,
+    top: 656,
 
     width: 326,
     height: 50,
@@ -404,5 +439,26 @@ const styles = StyleSheet.create({
 
   pressed: {
     opacity: 0.75,
+  },
+  disabled: { opacity: 0.5 },
+  notice: {
+    position: 'absolute',
+    left: 32,
+    top: 394,
+    width: 326,
+    fontFamily: fonts.semiBold,
+    fontSize: 14,
+    lineHeight: 21,
+    color: colors.primary,
+  },
+  error: {
+    position: 'absolute',
+    left: 32,
+    top: 728,
+    width: 326,
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    lineHeight: 21,
+    color: colors.danger,
   },
 });
