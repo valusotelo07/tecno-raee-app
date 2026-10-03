@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
-import { router, type Href } from 'expo-router';
-import { useEffect, useRef, type ReactNode } from 'react';
+import type { Href } from 'expo-router';
+import { useEffect, useRef, type ComponentProps, type ReactNode } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -12,18 +12,25 @@ import {
   View,
   type TextInputProps,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Logo } from '@/components/auth/Logo';
+import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { ActionButton } from '@/components/ui/ActionButton';
 import { colors, fonts } from '@/theme';
+import { useScrollReset } from '@/hooks/useScrollReset';
 
 export const portalStyles = StyleSheet.create({
   title: { fontFamily: fonts.bold, fontSize: 28, lineHeight: 36, color: colors.text },
   subtitle: { fontFamily: fonts.semiBold, fontSize: 20, lineHeight: 28, color: colors.brandDark },
-  body: { fontFamily: fonts.regular, fontSize: 15, lineHeight: 23, color: colors.brandDark },
-  hint: { fontFamily: fonts.regular, fontSize: 13, lineHeight: 20, color: colors.brandDark },
+  body: { fontFamily: fonts.regular, fontSize: 15, lineHeight: 23, color: colors.text },
+  hint: { fontFamily: fonts.regular, fontSize: 13, lineHeight: 20, color: colors.textSecondary },
   section: { gap: 16, paddingVertical: 24, borderTopWidth: 1, borderTopColor: colors.border },
-  row: { gap: 8, paddingVertical: 16, borderBottomWidth: 1, borderBottomColor: colors.border },
+  row: {
+    gap: 8,
+    padding: 16,
+    borderWidth: 1,
+    borderRadius: 8,
+    borderColor: colors.border,
+    backgroundColor: colors.background,
+  },
   actions: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, alignItems: 'center' },
   stack: { gap: 16 },
   link: { fontFamily: fonts.semiBold, color: colors.primary, fontSize: 15 },
@@ -35,9 +42,12 @@ export function PortalPage({
   children,
   back,
 }: Readonly<{ title: string; subtitle?: string; children: ReactNode; back?: Href }>) {
+  const scroll = useScrollReset();
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
+      <ScreenHeader title={title} back={back} />
       <ScrollView
+        ref={scroll}
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{
           padding: 24,
@@ -48,21 +58,10 @@ export function PortalPage({
           flexGrow: 1,
         }}
       >
-        <View
-          style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}
-        >
-          <Logo compact />
-          {back && <PortalLink title="Volver" onPress={() => router.replace(back)} />}
-        </View>
-        <View style={{ gap: 8 }}>
-          <Text accessibilityRole="header" style={portalStyles.title}>
-            {title}
-          </Text>
-          {subtitle && <Text style={portalStyles.body}>{subtitle}</Text>}
-        </View>
+        {subtitle && <Text style={portalStyles.body}>{subtitle}</Text>}
         {children}
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 export function PortalLink({
@@ -85,10 +84,56 @@ export function PortalLink({
     </Pressable>
   );
 }
-export function PortalField({ label, ...props }: TextInputProps & { label: string }) {
+export function PortalMenuItem({
+  title,
+  description,
+  icon,
+  onPress,
+}: Readonly<{
+  title: string;
+  description: string;
+  icon: ComponentProps<typeof Ionicons>['name'];
+  onPress: () => void;
+}>) {
   return (
-    <View style={{ gap: 8 }}>
-      <Text style={portalStyles.body}>{label}</Text>
+    <Pressable
+      accessibilityRole="button"
+      onPress={onPress}
+      style={({ pressed }) => ({
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 14,
+        padding: 16,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: colors.border,
+        backgroundColor: pressed ? colors.primarySoft : colors.background,
+        minHeight: 76,
+      })}
+    >
+      <Ionicons name={icon} size={24} color={colors.primary} />
+      <View style={{ flex: 1, gap: 4 }}>
+        <Text style={portalStyles.link}>{title}</Text>
+        <Text style={portalStyles.hint}>{description}</Text>
+      </View>
+      <Ionicons name="chevron-forward" size={18} color={colors.primary} />
+    </Pressable>
+  );
+}
+export function PortalField({
+  label,
+  compact = false,
+  ...props
+}: TextInputProps & { label: string; compact?: boolean }) {
+  return (
+    <View
+      style={{
+        gap: compact ? 16 : 8,
+        flexDirection: compact ? 'row' : 'column',
+        alignItems: compact ? 'center' : undefined,
+      }}
+    >
+      <Text style={[portalStyles.body, compact && { flex: 1 }]}>{label}</Text>
       <TextInput
         accessibilityLabel={label}
         autoCapitalize="none"
@@ -107,6 +152,7 @@ export function PortalField({ label, ...props }: TextInputProps & { label: strin
             color: colors.text,
           },
           props.multiline && { minHeight: 90, textAlignVertical: 'top' },
+          compact && { width: 96, textAlign: 'right' },
           props.style,
         ]}
       />

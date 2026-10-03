@@ -15,7 +15,6 @@ import {
 
 import { AuthTextField } from '@/components/auth/AuthTextField';
 import { colors, fonts } from '@/theme';
-import { brand } from '@/config/brand';
 
 export default function NewPasswordScreen() {
   const { completePasswordRecovery } = useAuth();
@@ -71,8 +70,6 @@ export default function NewPasswordScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.screen}>
-          <Text style={styles.logo}>{brand.authName}</Text>
-
           <Text style={styles.description}>
             Creá una nueva contraseña para recuperar el acceso a tu cuenta.
           </Text>
@@ -160,121 +157,28 @@ export default function NewPasswordScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.surface,
-  },
-
-  scrollContent: {
-    flexGrow: 1,
-    backgroundColor: colors.surface,
-  },
-
-  screen: {
-    position: 'relative',
-    width: '100%',
-    maxWidth: 390,
-    minHeight: 844,
-    alignSelf: 'center',
-
-    backgroundColor: colors.surface,
-  },
-
-  logo: {
-    position: 'absolute',
-
-    left: 84,
-    top: 107,
-
-    fontFamily: fonts.bold,
-    fontWeight: '700',
-    fontSize: 32,
-    lineHeight: 39,
-
-    color: colors.primary,
-  },
+  container: { flex: 1, backgroundColor: colors.background },
+  scrollContent: { flexGrow: 1, padding: 24, paddingBottom: 32 },
+  screen: { width: '100%', maxWidth: 420, alignSelf: 'center', gap: 18 },
+  pressed: { opacity: 0.75 },
+  disabled: { opacity: 0.6 },
+  error: { fontFamily: fonts.regular, fontSize: 14, lineHeight: 21, color: colors.danger },
 
   description: {
-    position: 'absolute',
-
-    left: 19,
-    top: 171,
-
-    width: 337,
-
     fontFamily: fonts.regular,
-    fontWeight: '400',
-    fontSize: 16,
-    lineHeight: 19,
-    textAlign: 'center',
-
-    color: colors.primary,
+    fontSize: 15,
+    lineHeight: 22,
+    color: colors.textSecondary,
   },
-
-  passwordField: {
-    position: 'absolute',
-
-    left: 31,
-    top: 298,
-
-    width: 330,
-    height: 76,
-  },
-
-  confirmPasswordField: {
-    position: 'absolute',
-
-    left: 31,
-    top: 413,
-
-    width: 330,
-    height: 76,
-  },
-
-  eyeButton: {
-    width: 45,
-    height: '100%',
-
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
+  passwordField: { width: '100%' },
+  confirmPasswordField: { width: '100%' },
+  eyeButton: { width: 45, height: '100%', alignItems: 'center', justifyContent: 'center' },
   saveButton: {
-    position: 'absolute',
-
-    left: 31,
-    top: 552,
-
-    width: 326,
-    height: 50,
-
+    minHeight: 52,
     alignItems: 'center',
     justifyContent: 'center',
-
     backgroundColor: colors.primary,
     borderRadius: 12,
   },
-
-  saveButtonText: {
-    fontFamily: fonts.semiBold,
-    fontWeight: '600',
-    fontSize: 14,
-    lineHeight: 17,
-
-    color: colors.textOnPrimary,
-  },
-
-  pressed: {
-    opacity: 0.75,
-  },
-  error: {
-    position: 'absolute',
-    left: 31,
-    top: 630,
-    width: 330,
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    lineHeight: 21,
-    color: colors.danger,
-  },
+  saveButtonText: { fontFamily: fonts.semiBold, fontSize: 14, color: colors.textOnPrimary },
 });

@@ -1,4 +1,4 @@
-import { colors } from '@/theme';
+import { colors, fonts } from '@/theme';
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
@@ -24,15 +24,16 @@ export function QuickAccess({ title, icon, onPress }: Readonly<QuickAccessProps>
 
 const styles = StyleSheet.create({
   quickAccess: {
-    width: '48%',
-    height: 100,
-    flexDirection: 'row',
+    flex: 1,
+    minHeight: 80,
+    gap: 8,
+    justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 12,
-    backgroundColor: colors.background,
-    borderWidth: 1,
-    borderColor: colors.primary,
-    borderRadius: 10,
+    paddingHorizontal: 3,
+    paddingVertical: 12,
+    backgroundColor: colors.surface,
+    borderRadius: 19,
+    boxShadow: '0 5px 16px rgba(22,65,39,0.08)',
   },
 
   quickIcon: {
@@ -42,11 +43,8 @@ const styles = StyleSheet.create({
   },
 
   quickText: {
-    flex: 1,
-    marginLeft: 14,
-    fontFamily: 'Inter_600SemiBold',
-    fontSize: 16,
-    fontWeight: '500',
+    fontFamily: fonts.semiBold,
+    fontSize: 11,
     textAlign: 'center',
     color: colors.text,
   },

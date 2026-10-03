@@ -137,8 +137,7 @@ function DeliveryForm({
                 onChangeText={(v) => setQuantities((q) => ({ ...q, [c.id]: v }))}
               />
               <Text style={s.hint}>
-                {rates.points[c.id] ?? 0} puntos en {point.companyName} · {rates.xp[c.id] ?? 0} XP
-                por unidad
+                {rates.points[c.id] ?? 0} puntos globales · {rates.xp[c.id] ?? 0} XP por unidad
               </Text>
             </View>
           ))}
@@ -182,8 +181,8 @@ function DeliveryForm({
             />
           )}
           <Text style={s.body}>
-            Estimado: {estimate.points} puntos de empresa + {estimate.xp} XP. El equipo verificará
-            las cantidades antes de acreditar.
+            Estimado: {estimate.points} puntos globales + {estimate.xp} XP. El equipo verificará las
+            cantidades antes de acreditar.
           </Text>
           <ActionButton
             title="Confirmar y generar QR"

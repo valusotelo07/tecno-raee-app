@@ -46,15 +46,13 @@ export function DeliverySummary({
               : `${i.declaredQuantity} declarados`}
           </Text>
           <Text style={s.hint}>
-            {i.pointsSnapshot} puntos de empresa + {i.xpSnapshot} XP por unidad
+            {i.pointsSnapshot} puntos globales + {i.xpSnapshot} XP por unidad
           </Text>
         </View>
       ))}
       {status === 'CONFIRMED' ? (
         <View style={s.stack}>
-          <Text style={s.subtitle}>
-            +{delivery.points} puntos en {delivery.companyName}
-          </Text>
+          <Text style={s.subtitle}>+{delivery.points} puntos globales</Text>
           <Text style={s.subtitle}>+{delivery.xp} XP global</Text>
           <Text style={s.body}>
             Recepción confirmada el {new Date(delivery.confirmedAt!).toLocaleString('es-AR')}. El
@@ -63,7 +61,7 @@ export function DeliverySummary({
         </View>
       ) : status === 'PENDING_RECEPTION' ? (
         <Text style={s.body}>
-          Estimado: {estimate.points} puntos de empresa y {estimate.xp} XP. Se acreditan después de
+          Estimado: {estimate.points} puntos globales y {estimate.xp} XP. Se acreditan después de
           verificar la recepción física.
         </Text>
       ) : (

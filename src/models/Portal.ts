@@ -94,6 +94,10 @@ export interface CompanyPortalData {
   invitations: CompanyInvitation[];
   limitRequests: CompanyLimitRequest[];
 }
+export interface PointInput extends Omit<ManagedPoint, 'id'> {
+  id?: string;
+  companyId: string;
+}
 export interface ImpactLevel {
   id: string;
   name: string;
@@ -113,8 +117,6 @@ export interface AuditEntry {
 }
 export interface AdminPortalData {
   companies: PortalCompany[];
-  applications: CompanyApplication[];
-  invitations: CompanyInvitation[];
   limitRequests: CompanyLimitRequest[];
   categories: (DeviceCategory & { impactXp: number })[];
   levels: ImpactLevel[];

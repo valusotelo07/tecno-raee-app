@@ -20,6 +20,8 @@ import {
 } from '@/models/Delivery';
 import { useAuth } from '@/providers/AuthProvider';
 import { deliveryCommand } from '@/services/delivery.service';
+import { rewardCommand } from '@/services/reward.service';
+import type { Redemption } from '@/models/Reward';
 
 export default function ScannerScreen() {
   const { company } = useAuth();
@@ -43,6 +45,7 @@ function Scanner({
   const scanLock = useRef(false);
   const [code, setCode] = useState(initialCode ?? '');
   const [delivery, setDelivery] = useState<Delivery | null>(null);
+  const [redemption, setRedemption] = useState<Redemption | null>(null);
   const [quantities, setQuantities] = useState<Record<string, string>>({});
   const action = usePortalAction();
   useFocusEffect(
@@ -54,7 +57,15 @@ function Scanner({
     )
   );
   async function lookup(raw: string) {
+    setDelivery(null);
+    setRedemption(null);
     const parsed = parseOperationCode(raw);
+    if (parsed.type === 'REWARD') {
+      const found = await rewardCommand('lookup', { companyId, code: parsed.code });
+      setCode(parsed.code);
+      setRedemption(found);
+      return;
+    }
     if (parsed.type !== 'DELIVERY')
       throw new Error(
         parsed.type === 'PICKUP'
@@ -73,11 +84,11 @@ function Scanner({
   }
   return (
     <PortalPage
-      title="Recibir entrega"
-      subtitle="Revisá los dispositivos físicamente antes de confirmar."
+      title="Entregas y canjes"
+      subtitle="Verificá los dispositivos o el premio antes de confirmar."
       back="/company"
     >
-      {!delivery && (
+      {!delivery && !redemption && (
         <>
           <ActionButton
             title={camera ? 'Cerrar cámara' : 'Escanear QR / código de barras'}
@@ -120,7 +131,7 @@ function Scanner({
             />
           )}
           <PortalField
-            label="Código de entrega"
+            label="Código de entrega o premio"
             placeholder="TR-… o contenido del QR"
             value={code}
             onChangeText={setCode}
@@ -128,7 +139,7 @@ function Scanner({
             autoCapitalize="characters"
           />
           <ActionButton
-            title="Buscar entrega"
+            title="Buscar código"
             loading={action.busy}
             onPress={() => {
               setCamera(false);
@@ -136,6 +147,44 @@ function Scanner({
             }}
           />
         </>
+      )}
+      {redemption && (
+        <View style={s.stack}>
+          <Text style={s.subtitle}>{redemption.reward.title}</Text>
+          <Text style={s.body}>
+            {redemption.reward.businessName} · {redemption.citizenName}
+          </Text>
+          <Text style={s.body}>
+            {redemption.status === 'RESERVED' ? 'Pendiente de uso' : 'Premio ya entregado'}
+          </Text>
+          <Text style={s.hint}>
+            {redemption.pointsCost} puntos globales ya descontados al reservar.
+          </Text>
+          {redemption.status === 'RESERVED' && (
+            <ActionButton
+              title="Confirmar entrega del premio"
+              loading={action.busy}
+              onPress={() =>
+                void action.run(async () => {
+                  const received = await rewardCommand('confirm', {
+                    companyId,
+                    code: redemption.code,
+                  });
+                  setRedemption(received);
+                }, 'Premio entregado. El código ya no puede volver a usarse.')
+              }
+            />
+          )}
+          <ActionButton
+            title="Escanear otro código"
+            secondary
+            disabled={action.busy}
+            onPress={() => {
+              setRedemption(null);
+              setCode('');
+            }}
+          />
+        </View>
       )}
       {delivery && (
         <>

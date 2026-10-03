@@ -1,5 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+function errorMessage(error: unknown, fallback: string) {
+  return error &&
+    typeof error === 'object' &&
+    'message' in error &&
+    typeof error.message === 'string'
+    ? error.message
+    : fallback;
+}
+
 export function usePortalData<T>(loader: () => Promise<T>) {
   const [result, setResult] = useState<{
     loader: () => Promise<T>;
@@ -21,7 +30,7 @@ export function usePortalData<T>(loader: () => Promise<T>) {
             setResult({
               loader,
               data: null,
-              error: e instanceof Error ? e.message : 'No pudimos cargar los datos.',
+              error: errorMessage(e, 'No pudimos cargar los datos.'),
             });
         }
       )
@@ -63,7 +72,7 @@ export function usePortalAction() {
       await action();
       setNotice(success);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'No pudimos guardar los cambios.');
+      setError(errorMessage(e, 'No pudimos guardar los cambios.'));
     } finally {
       lock.current = false;
       setBusy(false);

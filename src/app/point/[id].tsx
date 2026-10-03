@@ -1,7 +1,7 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { Linking, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { ActionButton } from '@/components/ui/ActionButton';
 import { AccountRequired } from '@/components/auth/AccountRequired';
 import { DiscoveryState } from '@/components/discovery/DiscoveryState';
@@ -16,8 +16,10 @@ import {
 import { useAuth } from '@/providers/AuthProvider';
 import { useDiscovery } from '@/providers/DiscoveryProvider';
 import { colors, fonts } from '@/theme';
+import { useScrollReset } from '@/hooks/useScrollReset';
 
 export default function PointDetailScreen() {
+  const scroll = useScrollReset();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { guest } = useAuth();
   const { points, loading, error, refresh, location, now } = useDiscovery();
@@ -26,7 +28,6 @@ export default function PointDetailScreen() {
   const point = points.find((p) => p.id === id);
   const mapPoints = useMemo(() => (point ? [point] : []), [point]);
   const noSelect = useCallback(() => {}, []);
-  const back = () => (router.canGoBack() ? router.back() : router.replace('/green-points'));
   const openLink = async (url: string) => {
     setLinkError(null);
     try {
@@ -39,17 +40,17 @@ export default function PointDetailScreen() {
   };
   if (needsAccount)
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
-        <AccountRequired title="Registrá tu entrega" />
+      <View style={styles.container}>
+        <AccountRequired title="Registrar entrega" onBack={() => setNeedsAccount(false)} />
         <View style={{ padding: 24 }}>
           <ActionButton title="Volver al punto" secondary onPress={() => setNeedsAccount(false)} />
         </View>
-      </SafeAreaView>
+      </View>
     );
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <ScrollView contentContainerStyle={styles.content}>
-        <ActionButton title="Volver" secondary onPress={back} />
+    <View style={styles.container}>
+      <ScreenHeader title="Detalle del punto" back="/green-points" />
+      <ScrollView ref={scroll} contentContainerStyle={styles.content}>
         {loading || error ? (
           <DiscoveryState loading={loading} error={error} retry={refresh} />
         ) : !point ? (
@@ -164,7 +165,7 @@ export default function PointDetailScreen() {
           </>
         )}
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 const styles = StyleSheet.create({

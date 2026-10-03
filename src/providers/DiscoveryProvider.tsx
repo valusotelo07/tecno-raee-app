@@ -48,6 +48,7 @@ export function DiscoveryProvider({ children }: Readonly<{ children: ReactNode }
   } | null>(null);
   const [now, setNow] = useState(() => new Date());
   const locationRequest = useRef(0);
+  const refresh = useCallback(() => setRevision((r) => r + 1), []);
   useEffect(() => {
     if (!enabled) return;
     const controller = new AbortController();
@@ -136,7 +137,7 @@ export function DiscoveryProvider({ children }: Readonly<{ children: ReactNode }
         categories: current?.categories ?? [],
         loading: enabled && current === null,
         error: current?.error ?? null,
-        refresh: () => setRevision((r) => r + 1),
+        refresh,
         location: currentGeo?.location ?? null,
         locating: currentGeo?.locating ?? false,
         locationError: currentGeo?.error ?? null,

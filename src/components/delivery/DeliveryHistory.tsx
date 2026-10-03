@@ -38,7 +38,7 @@ export function DeliveryHistory({ companyId = null }: Readonly<{ companyId?: str
           </Text>
           {d.status === 'CONFIRMED' && (
             <Text style={s.body}>
-              {d.points} puntos de empresa · {d.xp} XP
+              +{d.points} puntos globales · +{d.xp} XP
             </Text>
           )}
           <PortalLink

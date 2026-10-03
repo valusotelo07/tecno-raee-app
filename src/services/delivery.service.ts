@@ -66,6 +66,7 @@ export async function getDeliveryBalance(): Promise<DeliveryBalance> {
   const level = (l: Row | null) =>
     l ? { name: String(l.name), minimumXp: Number(l.minimum_xp) } : null;
   return {
+    points: Number(data.points),
     xp: Number(data.xp),
     level: level(data.level),
     nextLevel: level(data.nextLevel),

@@ -2,17 +2,29 @@
 
 # dependencies
 node_modules/
-package-lock.json
 
 # Local implementation reports and tests
 /docs/
 /tests/
+!/tests/
+/tests/*
+!/tests/*.test.mjs
 /supabase/tests/
 /supabase/migrations/
+!/supabase/migrations/
+/supabase/migrations/*
+!/supabase/migrations/20261003012055_global_points_rewards.sql
+!/supabase/migrations/20261003061458_admin_search_edit.sql
+!/supabase/migrations/20261003063021_admin_search_hardening.sql
+!/supabase/tests/
+/supabase/tests/*
+!/supabase/tests/global-rewards.test.sql
+!/supabase/tests/admin-search-edit.test.sql
 
 # Expo
 .expo/
 dist/
+dist-rewards/
 web-build/
 expo-env.d.ts
 
