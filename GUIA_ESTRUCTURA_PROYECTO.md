@@ -7,11 +7,14 @@ La idea principal es separar responsabilidades para evitar lógica, estilos y co
 src/
 ├── app/          → pantallas y rutas
 ├── components/   → componentes reutilizables
+├── config/       → marca y configuración de integraciones
 ├── hooks/        → hooks personalizados
-├── services/          → servicios, Firebase, helpers y APIs
+├── services/     → servicios y APIs
 ├── models/       → tipos e interfaces
 └── theme/        → colores, tipografías y otros tokens visuales
 ```
+
+El nombre de la app se edita en `src/config/brand.json`; los componentes lo leen desde `@/config/brand`. Ver [Cambiar el nombre de la app](CAMBIO_DE_NOMBRE.md) para el procedimiento completo.
 
 ## 1. Crear una nueva pantalla
 

@@ -14,6 +14,7 @@ import {
 import { AuthTextField } from '@/components/auth/AuthTextField';
 import { login } from '@/services/auth.service';
 import { colors, fonts } from '@/theme';
+import { brand } from '@/config/brand';
 import { authRoute, parseAuthIntent } from '@/models/AuthFlow';
 import { useAuth } from '@/providers/AuthProvider';
 
@@ -62,7 +63,7 @@ export default function LoginScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.screen}>
-          <Text style={styles.logo}>TECNO RAEE</Text>
+          <Text style={styles.logo}>{brand.authName}</Text>
 
           <Text style={styles.subtitle}>Accedé a tu cuenta</Text>
 

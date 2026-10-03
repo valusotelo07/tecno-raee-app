@@ -15,6 +15,7 @@ import {
 
 import { AuthTextField } from '@/components/auth/AuthTextField';
 import { colors, fonts } from '@/theme';
+import { brand } from '@/config/brand';
 
 export default function NewPasswordScreen() {
   const { completePasswordRecovery } = useAuth();
@@ -70,7 +71,7 @@ export default function NewPasswordScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.screen}>
-          <Text style={styles.logo}>TECNO RAEE</Text>
+          <Text style={styles.logo}>{brand.authName}</Text>
 
           <Text style={styles.description}>
             Creá una nueva contraseña para recuperar el acceso a tu cuenta.

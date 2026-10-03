@@ -2,6 +2,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { colors, fonts } from '@/theme';
+import { brand } from '@/config/brand';
 
 type Props = {
   variant?: 'dark' | 'light';
@@ -16,7 +17,12 @@ export function Logo({ variant = 'dark', compact = false }: Readonly<Props>) {
       {!compact && <MaterialCommunityIcons name="recycle" size={34} color={colors.accent} />}
 
       <Text style={[styles.text, light && styles.textLight, compact && styles.compact]}>
-        Tecno<Text style={[styles.green, compact && { color: colors.primary }]}>RAEE</Text>
+        {brand.wordmarkPrefix}
+        {brand.wordmarkSuffix && (
+          <Text style={[styles.green, compact && { color: colors.primary }]}>
+            {brand.wordmarkSuffix}
+          </Text>
+        )}
       </Text>
     </View>
   );

@@ -47,6 +47,7 @@ export function effectiveDeliveryStatus(
     : delivery.status;
 }
 export function deliveryQr(code: string) {
+  // Protocolo estable: conservar este prefijo aunque cambie el nombre comercial.
   return `TECNO-RAEE:DELIVERY:${code}`;
 }
 export function parseOperationCode(value: string): {
@@ -58,7 +59,7 @@ export function parseOperationCode(value: string): {
     /^(?:TECNO-RAEE:(DELIVERY|PICKUP|REWARD):)?(TR-[A-F0-9]{8}(?:-[A-F0-9]{8}){3})$/.exec(
       normalized
     );
-  if (!match) throw new Error('Ingresá o escaneá un código válido de TecnoRAEE.');
+  if (!match) throw new Error('Ingresá o escaneá un código válido.');
   return { type: (match[1] ?? 'DELIVERY') as 'DELIVERY' | 'PICKUP' | 'REWARD', code: match[2] };
 }
 export function deliveryQuantity(value: string, allowZero = false): number {
