@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Text, View } from 'react-native';
 import { ActionButton } from '@/components/ui/ActionButton';
+import { brand } from '@/config/brand';
 import {
   PortalPage,
   PortalNav,
@@ -142,7 +143,7 @@ function CompanyProfile({
         {data.details?.legalName} · CUIT {data.details?.taxId}
       </Text>
       <Text style={s.hint}>
-        Los datos legales se verificaron durante el alta. Contactá a TecnoRAEE si necesitan una
+        Los datos legales se verificaron durante el alta. Contactá a {brand.name} si necesitan una
         corrección.
       </Text>
       <PortalField
@@ -256,7 +257,7 @@ function CategoryPoints({
   return (
     <View style={s.stack}>
       <Text style={s.body}>
-        Estos puntos pertenecen a {data.company.name}. El XP global lo administra TecnoRAEE. La
+        Estos puntos pertenecen a {data.company.name}. El XP global lo administra {brand.name}. La
         acreditación ocurrirá al confirmar una recepción física.
       </Text>
       {data.categories.map((c) => (

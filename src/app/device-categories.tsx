@@ -7,6 +7,7 @@ import { ActionButton } from '@/components/ui/ActionButton';
 import type { DeviceCategory } from '@/models/DeviceCategory';
 import { getDeviceCategories } from '@/services/device-category.service';
 import { colors, fonts } from '@/theme';
+import { brand } from '@/config/brand';
 
 export default function DeviceCategoriesScreen() {
   const [categories, setCategories] = useState<DeviceCategory[]>([]);
@@ -34,7 +35,7 @@ export default function DeviceCategoriesScreen() {
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.title}>Qué recibimos</Text>
         <Text style={styles.description}>
-          Estas son las categorías de TecnoRAEE. Cada punto verde define cuáles recibe.
+          Estas son las categorías de {brand.name}. Cada punto verde define cuáles recibe.
         </Text>
         {loading ? (
           <ActivityIndicator color={colors.primary} />

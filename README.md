@@ -2,6 +2,8 @@
 
 La descripción funcional del proyecto, los recorridos por rol y los pendientes están en [Proyecto y funcionalidades](PROYECTO_Y_FEATURES.md).
 
+El nombre comercial está centralizado en `src/config/brand.json`. La guía [Cambiar el nombre de la app](CAMBIO_DE_NOMBRE.md) explica cómo actualizarlo, revisar los recursos visuales y conservar los identificadores compatibles con los datos y enlaces existentes.
+
 Aplicación de gestión de RAEE con React Native, Expo SDK 57, Expo Router, TypeScript y Supabase. El código activo está en `src/app/`; servicios en `src/services/`, modelos en `src/models/` y estilos compartidos en `src/theme/`.
 
 Se implementaron las fundaciones del Sprint 1, el descubrimiento del Sprint 2, los portales reales de empresa/admin y las entregas del Sprint 5: registro, QR, recepción física con cantidades ajustables, movimientos de puntos por empresa, XP global e historial. Conservan el estilo de Home/onboarding.

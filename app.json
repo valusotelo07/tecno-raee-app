@@ -1,6 +1,5 @@
 {
   "expo": {
-    "name": "tecno-raee-app",
     "slug": "tecno-raee-app",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -11,6 +10,7 @@
       "icon": "./assets/expo.icon"
     },
     "android": {
+      "package": "com.ikarus16x.tecnoraeeapp",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -35,13 +35,7 @@
       ],
       "expo-font",
       "expo-image",
-      "expo-web-browser",
-      [
-        "expo-location",
-        {
-          "locationWhenInUsePermission": "TecnoRAEE usa tu ubicación para encontrar puntos verdes cercanos."
-        }
-      ]
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,

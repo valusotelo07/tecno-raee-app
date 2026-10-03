@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { Text, View } from 'react-native';
 import { ActionButton } from '@/components/ui/ActionButton';
+import { brand } from '@/config/brand';
 import {
   PortalPage,
   PortalField,
@@ -40,7 +41,7 @@ export default function CompanyApplicationScreen() {
   return (
     <PortalPage
       title="Sumá tu organización"
-      subtitle="Solicitá el alta para recibir tecnología en desuso a través de TecnoRAEE."
+      subtitle={`Solicitá el alta para recibir tecnología en desuso a través de ${brand.name}.`}
       back="/"
     >
       {!loading && !session ? (

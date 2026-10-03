@@ -14,6 +14,7 @@ import {
 
 import { AuthTextField } from '@/components/auth/AuthTextField';
 import { colors } from '@/theme';
+import { brand } from '@/config/brand';
 import { register } from '@/services/auth.service';
 import { authRoute, parseAuthIntent } from '@/models/AuthFlow';
 import { useAuth } from '@/providers/AuthProvider';
@@ -95,7 +96,7 @@ export default function CreateAccountScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.screen}>
-          <Text style={styles.logo}>TECNO RAEE</Text>
+          <Text style={styles.logo}>{brand.authName}</Text>
 
           <Text style={styles.subtitle}>Comenzá a reciclar</Text>
 

@@ -14,6 +14,7 @@ import { filterGreenPoints, type GreenPoint } from '@/models/GreenPoint';
 import { useAuth } from '@/providers/AuthProvider';
 import { useDiscovery } from '@/providers/DiscoveryProvider';
 import { colors, fonts } from '@/theme';
+import { brand } from '@/config/brand';
 
 export default function HomeScreen() {
   const { profile } = useAuth();
@@ -37,7 +38,7 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <Text style={styles.brand}>TecnoRAEE</Text>
+        <Text style={styles.brand}>{brand.name}</Text>
         <View style={styles.intro}>
           <Text style={styles.greeting}>
             Hola, {profile?.fullName.split(' ')[0] || 'visitante'}

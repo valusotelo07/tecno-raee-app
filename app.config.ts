@@ -1,16 +1,24 @@
 import type { ConfigContext, ExpoConfig } from 'expo/config';
+import staticConfig from './app.json';
+import brand from './src/config/brand.json';
 
 export default function appConfig({ config }: ConfigContext): ExpoConfig {
   return {
     ...config,
-    name: config.name ?? 'tecno-raee-app',
-    slug: config.slug ?? 'tecno-raee-app',
+    name: brand.name,
+    slug: config.slug ?? staticConfig.expo.slug,
     plugins: [
       ...(config.plugins ?? []),
       [
+        'expo-location',
+        {
+          locationWhenInUsePermission: `${brand.name} usa tu ubicación para encontrar puntos verdes cercanos.`,
+        },
+      ],
+      [
         'expo-camera',
         {
-          cameraPermission: 'TecnoRAEE usa la cámara para escanear códigos de entregas.',
+          cameraPermission: `${brand.name} usa la cámara para escanear códigos de entregas.`,
           microphonePermission: false,
           recordAudioAndroid: false,
           barcodeScannerEnabled: true,
@@ -19,9 +27,8 @@ export default function appConfig({ config }: ConfigContext): ExpoConfig {
       [
         'expo-image-picker',
         {
-          photosPermission:
-            'TecnoRAEE permite adjuntar una foto de los dispositivos que vas a entregar.',
-          cameraPermission: 'TecnoRAEE usa la cámara para escanear códigos de entregas.',
+          photosPermission: `${brand.name} permite adjuntar una foto de los dispositivos que vas a entregar.`,
+          cameraPermission: `${brand.name} usa la cámara para escanear códigos de entregas.`,
           microphonePermission: false,
         },
       ],

@@ -15,6 +15,7 @@ import {
 import { AuthTextField } from '@/components/auth/AuthTextField';
 import { sendRecoveryCode, verifyRecoveryCode } from '@/services/auth.service';
 import { colors, fonts } from '@/theme';
+import { brand } from '@/config/brand';
 
 const OTP_LENGTH = 6;
 const OTP_SLOTS = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth'] as const;
@@ -105,7 +106,7 @@ export default function ForgotPasswordScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.screen}>
-          <Text style={styles.logo}>TECNO RAEE</Text>
+          <Text style={styles.logo}>{brand.authName}</Text>
 
           <Text style={styles.subtitle}>Recuperá tu Contraseña</Text>
 
