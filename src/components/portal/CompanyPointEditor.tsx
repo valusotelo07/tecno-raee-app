@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Text, View } from 'react-native';
 import { ActionButton } from '@/components/ui/ActionButton';
 import {
@@ -10,23 +10,32 @@ import {
   portalStyles as s,
 } from './PortalUI';
 import { usePortalAction } from '@/hooks/usePortalData';
-import type { CompanyPortalData, ManagedPoint } from '@/models/Portal';
+import type { CompanyPortalData, ManagedPoint, PointInput } from '@/models/Portal';
 import { weekdays, parseSchedules, scheduleText } from '@/models/PointSchedule';
 import { portalCommand } from '@/services/portal.service';
+import { AddressField } from './AddressField';
+import { LocationPicker } from './LocationPicker';
+import { joinPointAddress, splitPointAddress } from '@/models/PointAddress';
 
 export function CompanyPointEditor({
   data,
   point,
   onSaved,
   onCancel,
+  savePoint = (input) => portalCommand('save_point', input),
 }: Readonly<{
   data: CompanyPortalData;
   point: ManagedPoint | null;
   onSaved: () => Promise<void>;
   onCancel: () => void;
+  savePoint?: (input: PointInput) => Promise<unknown>;
 }>) {
+  const initialAddress = splitPointAddress(point?.address ?? '');
   const [name, setName] = useState(point?.name ?? ''),
-    [address, setAddress] = useState(point?.address ?? '');
+    [address, setAddress] = useState(initialAddress.address);
+  const [crossStreets, setCrossStreets] = useState(initialAddress.crossStreets);
+  const [manualCoordinates, setManualCoordinates] = useState(false);
+  const [advanced, setAdvanced] = useState(false);
   const [latitude, setLatitude] = useState(point ? String(point.latitude) : ''),
     [longitude, setLongitude] = useState(point ? String(point.longitude) : '');
   const [phone, setPhone] = useState(point?.phone ?? data.details?.phone ?? ''),
@@ -37,6 +46,20 @@ export function CompanyPointEditor({
   const [categories, setCategories] = useState<string[]>(point?.categories ?? []);
   const [days, setDays] = useState(scheduleText(point?.schedules ?? []));
   const action = usePortalAction();
+  const lat = Number(latitude.replace(',', '.')),
+    lng = Number(longitude.replace(',', '.'));
+  const coordinate = useMemo(
+    () =>
+      latitude.trim() &&
+      longitude.trim() &&
+      Number.isFinite(lat) &&
+      Number.isFinite(lng) &&
+      Math.abs(lat) <= 90 &&
+      Math.abs(lng) <= 180
+        ? { latitude: lat, longitude: lng }
+        : null,
+    [latitude, longitude, lat, lng]
+  );
   return (
     <View style={s.section}>
       <Text style={s.subtitle}>{point ? 'Editar punto verde' : 'Nuevo punto verde'}</Text>
@@ -46,26 +69,69 @@ export function CompanyPointEditor({
         onChangeText={setName}
         editable={!action.busy}
       />
-      <PortalField
-        label="Dirección"
+      <Text style={s.subtitle}>Ubicación</Text>
+      <AddressField
         value={address}
-        onChangeText={setAddress}
-        editable={!action.busy}
+        onChange={(value) => {
+          setAddress(value);
+          setLatitude('');
+          setLongitude('');
+        }}
+        onSelect={(value) => {
+          setAddress(value.address);
+          setLatitude(String(value.latitude));
+          setLongitude(String(value.longitude));
+        }}
+        disabled={action.busy}
       />
       <PortalField
-        label="Latitud"
-        value={latitude}
-        onChangeText={setLatitude}
-        keyboardType="numbers-and-punctuation"
+        label="Entre calles (opcional)"
+        value={crossStreets}
+        onChangeText={setCrossStreets}
+        maxLength={200}
         editable={!action.busy}
       />
-      <PortalField
-        label="Longitud"
-        value={longitude}
-        onChangeText={setLongitude}
-        keyboardType="numbers-and-punctuation"
-        editable={!action.busy}
+      <Text style={s.hint}>
+        Tocá el mapa para ubicar el punto. También podés arrastrar el marcador para ajustar la
+        entrada. La dirección y las entrecalles serán visibles para los usuarios.
+      </Text>
+      <LocationPicker
+        value={coordinate}
+        onChange={(value) => {
+          setLatitude(String(value.latitude));
+          setLongitude(String(value.longitude));
+        }}
+        disabled={action.busy}
       />
+      <Text style={s.hint}>
+        {coordinate
+          ? 'Ubicación marcada. Revisá que coincida con la dirección.'
+          : 'Marcá la ubicación antes de guardar.'}
+      </Text>
+      <PortalLink
+        title={manualCoordinates ? 'Ocultar coordenadas' : 'Ingresar coordenadas manualmente'}
+        onPress={() => setManualCoordinates(!manualCoordinates)}
+        disabled={action.busy}
+      />
+      {manualCoordinates && (
+        <>
+          <PortalField
+            label="Latitud"
+            value={latitude}
+            onChangeText={setLatitude}
+            keyboardType="numbers-and-punctuation"
+            editable={!action.busy}
+          />
+          <PortalField
+            label="Longitud"
+            value={longitude}
+            onChangeText={setLongitude}
+            keyboardType="numbers-and-punctuation"
+            editable={!action.busy}
+          />
+        </>
+      )}
+      <Text style={s.subtitle}>Información del punto</Text>
       <PortalField
         label="Teléfono de contacto"
         value={phone}
@@ -79,13 +145,20 @@ export function CompanyPointEditor({
         multiline
         editable={!action.busy}
       />
-      <PortalField
-        label="Zona horaria"
-        value={timeZone}
-        onChangeText={setTimeZone}
-        editable={!action.busy}
+      <PortalLink
+        title={advanced ? 'Ocultar zona horaria' : 'Cambiar zona horaria'}
+        onPress={() => setAdvanced(!advanced)}
+        disabled={action.busy}
       />
-      <Text style={s.subtitle}>Categorías recibidas</Text>
+      {advanced && (
+        <PortalField
+          label="Zona horaria"
+          value={timeZone}
+          onChangeText={setTimeZone}
+          editable={!action.busy}
+        />
+      )}
+      <Text style={s.subtitle}>Dispositivos recibidos</Text>
       {data.categories.map((c) => (
         <PortalChoice
           key={c.id}
@@ -123,7 +196,7 @@ export function CompanyPointEditor({
         disabled={action.busy}
       />
       <PortalToggle
-        label="Publicado para ciudadanos"
+        label="Visible en Puntos verdes"
         value={active}
         onChange={setActive}
         disabled={action.busy}
@@ -147,11 +220,11 @@ export function CompanyPointEditor({
               lon > 180
             )
               throw new Error('Ingresá coordenadas válidas para ubicar el punto en el mapa.');
-            await portalCommand('save_point', {
+            await savePoint({
               id: point?.id,
               companyId: data.company.id,
               name,
-              address,
+              address: joinPointAddress(address, crossStreets),
               latitude: lat,
               longitude: lon,
               phone,

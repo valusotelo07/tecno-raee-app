@@ -5,15 +5,16 @@ import { AccountRequired } from '@/components/auth/AccountRequired';
 import { ActionButton } from '@/components/ui/ActionButton';
 import { DeliveryBalance } from '@/components/delivery/DeliveryBalance';
 import { DeliveryHistory } from '@/components/delivery/DeliveryHistory';
-import { PortalPage, PortalNav, portalStyles as s } from '@/components/portal/PortalUI';
+import { PortalNav, portalStyles as s } from '@/components/portal/PortalUI';
+import { CitizenPage } from '@/components/rewards/RewardsUI';
 import { useAuth } from '@/providers/AuthProvider';
 
 export default function MyRaeeScreen() {
   const { session } = useAuth();
   const [tab, setTab] = useState('Todos');
-  if (!session) return <AccountRequired title="Mis RAEE" />;
+  if (!session) return <AccountRequired title="Entregas" back="/profile" />;
   return (
-    <PortalPage title="Mis RAEE" subtitle="Tus entregas, puntos por empresa e impacto global.">
+    <CitizenPage title="Entregas" back="/profile">
       <DeliveryBalance />
       <ActionButton title="Registrar entrega" onPress={() => router.push('/new-delivery')} />
       <PortalNav items={['Todos', 'Entregas', 'Retiros']} selected={tab} onSelect={setTab} />
@@ -24,6 +25,6 @@ export default function MyRaeeScreen() {
       ) : (
         <DeliveryHistory />
       )}
-    </PortalPage>
+    </CitizenPage>
   );
 }

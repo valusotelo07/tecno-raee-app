@@ -2,14 +2,16 @@ import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { ActionButton } from '@/components/ui/ActionButton';
 import type { DeviceCategory } from '@/models/DeviceCategory';
 import { getDeviceCategories } from '@/services/device-category.service';
 import { colors, fonts } from '@/theme';
 import { brand } from '@/config/brand';
+import { useScrollReset } from '@/hooks/useScrollReset';
 
 export default function DeviceCategoriesScreen() {
+  const scroll = useScrollReset();
   const [categories, setCategories] = useState<DeviceCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -31,9 +33,9 @@ export default function DeviceCategoriesScreen() {
     };
   }, [revision]);
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.title}>Qué recibimos</Text>
+    <View style={styles.container}>
+      <ScreenHeader title="Qué recibimos" back="/profile" />
+      <ScrollView ref={scroll} contentContainerStyle={styles.content}>
         <Text style={styles.description}>
           Estas son las categorías de {brand.name}. Cada punto verde define cuáles recibe.
         </Text>
@@ -71,7 +73,7 @@ export default function DeviceCategoriesScreen() {
         )}
         <ActionButton title="Volver al inicio" secondary onPress={() => router.replace('/home')} />
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 const styles = StyleSheet.create({
@@ -83,7 +85,6 @@ const styles = StyleSheet.create({
     padding: 24,
     gap: 20,
   },
-  title: { fontFamily: fonts.bold, fontSize: 28, color: colors.primary },
   description: { fontFamily: fonts.regular, fontSize: 16, lineHeight: 24, color: colors.text },
   row: {
     borderBottomWidth: 1,

@@ -4,12 +4,15 @@ import type { ColorValue } from 'react-native';
 
 import { colors, fonts } from '@/theme';
 
-type TabIconName =
-  'home-outline' | 'map-outline' | 'clipboard-outline' | 'star-outline' | 'person-outline';
+type TabIconName = 'home' | 'map' | 'gift' | 'person';
 
 function tabIcon(name: TabIconName) {
-  return function TabIcon({ color, size }: Readonly<{ color: ColorValue; size: number }>) {
-    return <Ionicons name={name} size={size} color={color} />;
+  return function TabIcon({
+    color,
+    size,
+    focused,
+  }: Readonly<{ color: ColorValue; size: number; focused: boolean }>) {
+    return <Ionicons name={focused ? name : `${name}-outline`} size={size} color={color} />;
   };
 }
 
@@ -19,13 +22,15 @@ export default function AppLayout() {
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.text,
+        tabBarInactiveTintColor: '#748591',
         tabBarLabelStyle: {
           fontFamily: fonts.regular,
-          fontSize: 12,
+          fontSize: 11,
         },
         tabBarStyle: {
-          height: 75,
+          minHeight: 72,
+          paddingTop: 8,
+          paddingBottom: 12,
           backgroundColor: colors.tabBarBackground,
           borderTopColor: colors.border,
         },
@@ -35,31 +40,23 @@ export default function AppLayout() {
         name="home"
         options={{
           title: 'Inicio',
-          tabBarIcon: tabIcon('home-outline'),
+          tabBarIcon: tabIcon('home'),
         }}
       />
 
       <Tabs.Screen
         name="green-points"
         options={{
-          title: 'Mapa',
-          tabBarIcon: tabIcon('map-outline'),
-        }}
-      />
-
-      <Tabs.Screen
-        name="my-raee"
-        options={{
-          title: 'Mis RAEE',
-          tabBarIcon: tabIcon('clipboard-outline'),
+          title: 'Puntos verdes',
+          tabBarIcon: tabIcon('map'),
         }}
       />
 
       <Tabs.Screen
         name="rewards"
         options={{
-          title: 'Recompensas',
-          tabBarIcon: tabIcon('star-outline'),
+          title: 'Premios',
+          tabBarIcon: tabIcon('gift'),
         }}
       />
 
@@ -67,7 +64,7 @@ export default function AppLayout() {
         name="profile"
         options={{
           title: 'Perfil',
-          tabBarIcon: tabIcon('person-outline'),
+          tabBarIcon: tabIcon('person'),
         }}
       />
     </Tabs>

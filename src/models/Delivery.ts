@@ -27,6 +27,7 @@ export interface Delivery {
   items: DeliveryItem[];
 }
 export interface DeliveryBalance {
+  points: number;
   xp: number;
   level: { name: string; minimumXp: number } | null;
   nextLevel: { name: string; minimumXp: number } | null;
@@ -56,11 +57,14 @@ export function parseOperationCode(value: string): {
 } {
   const normalized = value.trim().toUpperCase();
   const match =
-    /^(?:TECNO-RAEE:(DELIVERY|PICKUP|REWARD):)?(TR-[A-F0-9]{8}(?:-[A-F0-9]{8}){3})$/.exec(
+    /^(?:TECNO-RAEE:(DELIVERY|PICKUP|REWARD):)?(TRR?-[A-F0-9]{8}(?:-[A-F0-9]{8}){3})$/.exec(
       normalized
     );
   if (!match) throw new Error('Ingresá o escaneá un código válido.');
-  return { type: (match[1] ?? 'DELIVERY') as 'DELIVERY' | 'PICKUP' | 'REWARD', code: match[2] };
+  const type = match[1] ?? (match[2].startsWith('TRR-') ? 'REWARD' : 'DELIVERY');
+  if (match[2].startsWith('TRR-') && type !== 'REWARD')
+    throw new Error('El código corresponde a un premio.');
+  return { type: type as 'DELIVERY' | 'PICKUP' | 'REWARD', code: match[2] };
 }
 export function deliveryQuantity(value: string, allowZero = false): number {
   const normalized = value.trim();

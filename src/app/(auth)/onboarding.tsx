@@ -2,8 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Redirect, router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Logo } from '@/components/auth/Logo';
+import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { ActionButton } from '@/components/ui/ActionButton';
 import { useAuth } from '@/providers/AuthProvider';
 import { colors, fonts } from '@/theme';
@@ -46,10 +45,17 @@ export default function OnboardingScreen() {
     }
   }
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <Logo compact />
+    <View style={styles.container}>
+      <ScreenHeader
+        title="Conocé TecnoRAEE"
+        back="/"
+        onBack={() => {
+          if (saving) return;
+          if (index > 0) setIndex(index - 1);
+          else if (router.canGoBack()) router.back();
+          else void finish();
+        }}
+        action={
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Saltar introducción"
@@ -59,7 +65,9 @@ export default function OnboardingScreen() {
           >
             <Text style={styles.link}>Saltar</Text>
           </Pressable>
-        </View>
+        }
+      />
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.steps} accessibilityLabel="Pasos de la introducción">
           {slides.map((item, step) => (
             <Pressable
@@ -148,13 +156,12 @@ export default function OnboardingScreen() {
           </Pressable>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { flexGrow: 1, width: '100%', maxWidth: 560, alignSelf: 'center', padding: 24 },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   skip: { paddingVertical: 14, paddingHorizontal: 4, alignItems: 'center' },
   link: { fontFamily: fonts.semiBold, color: colors.primary, fontSize: 14 },
   steps: { flexDirection: 'row', gap: 8 },

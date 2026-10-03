@@ -1,12 +1,15 @@
 import { Ionicons } from '@expo/vector-icons';
 import type { ReactNode } from 'react';
+import type { Href } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Logo } from '@/components/auth/Logo';
+import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { PortalNav, portalStyles } from './PortalUI';
-import { colors, fonts } from '@/theme';
+import { colors } from '@/theme';
+import { useScrollReset } from '@/hooks/useScrollReset';
 
 export function AdminPage({
+  title = 'Administración',
+  back = '/',
   name,
   sections,
   selected,
@@ -16,6 +19,8 @@ export function AdminPage({
   busy,
   children,
 }: Readonly<{
+  title?: string;
+  back?: Href;
   name: string;
   sections: readonly string[];
   selected: string;
@@ -25,12 +30,16 @@ export function AdminPage({
   busy: boolean;
   children: ReactNode;
 }>) {
+  const scroll = useScrollReset();
   return (
-    <SafeAreaView style={styles.page}>
+    <View style={styles.page}>
+      <ScreenHeader title={title} back={back} />
       <View style={styles.header}>
         <View style={styles.frame}>
           <View style={styles.toolbar}>
-            <Logo compact />
+            <Text numberOfLines={2} style={[portalStyles.body, { flex: 1 }]}>
+              {name}
+            </Text>
             <View style={styles.tools}>
               <Pressable
                 accessibilityRole="button"
@@ -52,28 +61,25 @@ export function AdminPage({
               </Pressable>
             </View>
           </View>
-          <View style={styles.heading}>
-            <Text accessibilityRole="header" style={styles.title}>
-              Administración
-            </Text>
-            <Text style={portalStyles.body}>{name}</Text>
-          </View>
           <PortalNav items={sections} selected={selected} onSelect={onSelect} />
         </View>
       </View>
       <ScrollView
+        ref={scroll}
         key={selected}
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={styles.content}
       >
-        <View style={styles.sectionHeading}>
-          <Text accessibilityRole="header" style={portalStyles.subtitle}>
-            {selected}
-          </Text>
+        <View style={styles.panel}>
+          <View style={styles.sectionHeading}>
+            <Text accessibilityRole="header" style={portalStyles.subtitle}>
+              {selected}
+            </Text>
+          </View>
+          {children}
         </View>
-        {children}
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -96,18 +102,25 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
   },
-  frame: { width: '100%', maxWidth: 1008, alignSelf: 'center', paddingHorizontal: 24 },
+  frame: { width: '100%', maxWidth: 960, alignSelf: 'center', paddingHorizontal: 20 },
   toolbar: {
-    minHeight: 72,
+    minHeight: 60,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    gap: 12,
   },
   tools: { flexDirection: 'row', gap: 8 },
   iconButton: { minHeight: 44, minWidth: 44, justifyContent: 'center', alignItems: 'center' },
-  heading: { gap: 4, paddingBottom: 16 },
-  title: { fontFamily: fonts.bold, fontSize: 28, lineHeight: 36, color: colors.text },
-  content: { width: '100%', maxWidth: 1008, alignSelf: 'center', padding: 24, gap: 24 },
+  content: { width: '100%', maxWidth: 960, alignSelf: 'center', padding: 16, paddingBottom: 32 },
+  panel: {
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 12,
+    padding: 20,
+    gap: 20,
+  },
   sectionHeading: { paddingBottom: 16, borderBottomWidth: 1, borderBottomColor: colors.border },
   empty: { gap: 12, paddingVertical: 32, maxWidth: 560 },
 });

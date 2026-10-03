@@ -1,9 +1,8 @@
 import { router } from 'expo-router';
-import { Linking, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { useState } from 'react';
 import { ActionButton } from '@/components/ui/ActionButton';
 import {
-  PortalNav,
   PortalField,
   PortalLoading,
   PortalFeedback,
@@ -11,33 +10,26 @@ import {
   portalStyles as s,
 } from '@/components/portal/PortalUI';
 import { AdminPage, AdminEmpty } from '@/components/portal/AdminPage';
+import { AdminSearch } from '@/components/portal/AdminSearch';
 import { AdminChangelog } from '@/components/portal/AdminChangelog';
+import { AdminRewards } from '@/components/portal/AdminRewards';
+import { AdminPoints } from '@/components/portal/AdminPoints';
 import { usePortalAction, usePortalData } from '@/hooks/usePortalData';
 import { useAuth } from '@/providers/AuthProvider';
-import {
-  applicationStatuses,
-  type AdminPortalData,
-  type CompanyApplication,
-  type ImpactLevel,
-} from '@/models/Portal';
-import {
-  companyDocumentUrl,
-  getAdminPortal,
-  portalCommand,
-  sendCompanyInvitation,
-} from '@/services/portal.service';
+import { type AdminPortalData, type ImpactLevel } from '@/models/Portal';
+import { getAdminPortal, portalCommand } from '@/services/portal.service';
 
 const sections = [
-  'Inicio',
-  'Solicitudes',
-  'Empresas',
+  'Puntos verdes',
+  'Premios',
+  'Buscador',
   'Límites',
   'Configuración global',
   'Historial de cambios',
 ] as const;
 export default function AdminScreen() {
   const { profile, logout } = useAuth();
-  const [tab, setTab] = useState<string>('Inicio');
+  const [tab, setTab] = useState<string>('Puntos verdes');
   const [historyRevision, setHistoryRevision] = useState(0);
   const { data, loading, error, refresh } = usePortalData(getAdminPortal);
   const action = usePortalAction();
@@ -63,268 +55,17 @@ export default function AdminScreen() {
       <PortalLoading loading={loading} error={error} retry={() => void refresh()} />
       {data && !error && (
         <View key={tab} style={s.stack}>
-          {tab === 'Inicio' && (
-            <>
-              <Text style={s.subtitle}>Pendientes de revisión</Text>
-              <PortalLink
-                title={`${data.applications.filter((a) => a.status === 'SUBMITTED' || a.status === 'UNDER_REVIEW').length} solicitudes de empresa`}
-                onPress={() => setTab('Solicitudes')}
-              />
-              <PortalLink
-                title={`${data.limitRequests.filter((r) => r.status === 'SUBMITTED').length} solicitudes de ampliación`}
-                onPress={() => setTab('Límites')}
-              />
-              <Text style={s.body}>
-                {data.companies.filter((c) => c.status === 'ACTIVE').length} empresas activas ·{' '}
-                {data.companies.filter((c) => c.status === 'SUSPENDED').length} suspendidas
-              </Text>
-              <Text style={s.hint}>
-                La aprobación crea la empresa y reserva el acceso de su responsable. El primer punto
-                verde se publica después de la configuración empresarial.
-              </Text>
-            </>
+          {tab === 'Buscador' && <AdminSearch companies={data.companies} refresh={refresh} />}
+          {tab === 'Puntos verdes' && (
+            <AdminPoints key={historyRevision} companies={data.companies} refresh={refresh} />
           )}
-          {tab === 'Solicitudes' && <Applications data={data} refresh={refresh} />}
-          {tab === 'Empresas' && <Companies data={data} refresh={refresh} />}
+          {tab === 'Premios' && <AdminRewards key={historyRevision} companies={data.companies} />}
           {tab === 'Límites' && <Limits data={data} refresh={refresh} />}
           {tab === 'Configuración global' && <GlobalSettings data={data} refresh={refresh} />}
           {tab === 'Historial de cambios' && <AdminChangelog key={historyRevision} />}
         </View>
       )}
     </AdminPage>
-  );
-}
-function Applications({
-  data,
-  refresh,
-}: Readonly<{ data: AdminPortalData; refresh: () => Promise<void> }>) {
-  const [filter, setFilter] = useState('Pendientes'),
-    [selected, setSelected] = useState<string | null>(null);
-  const application = data.applications.find((a) => a.id === selected);
-  const rows = data.applications.filter(
-    (a) => filter === 'Todas' || ['SUBMITTED', 'UNDER_REVIEW', 'NEEDS_INFO'].includes(a.status)
-  );
-  return (
-    <>
-      <PortalNav items={['Pendientes', 'Todas']} selected={filter} onSelect={setFilter} />
-      {application ? (
-        <ApplicationReview
-          key={application.id}
-          application={application}
-          refresh={refresh}
-          back={() => setSelected(null)}
-        />
-      ) : rows.length === 0 ? (
-        <AdminEmpty
-          title="No hay solicitudes para revisar"
-          description="Las organizaciones que soliciten el alta aparecerán aquí con sus datos y documentación."
-        />
-      ) : (
-        rows.map((a) => (
-          <View key={a.id} style={s.row}>
-            <Text style={s.subtitle}>{a.businessName}</Text>
-            <Text style={s.body}>
-              {applicationStatuses[a.status]} · CUIT {a.taxId}
-            </Text>
-            <Text style={s.hint}>
-              {a.responsible} · {new Date(a.createdAt).toLocaleDateString('es-AR')}
-            </Text>
-            <PortalLink title="Revisar solicitud" onPress={() => setSelected(a.id)} />
-          </View>
-        ))
-      )}
-    </>
-  );
-}
-function ApplicationReview({
-  application: a,
-  refresh,
-  back,
-}: Readonly<{ application: CompanyApplication; refresh: () => Promise<void>; back: () => void }>) {
-  const [note, setNote] = useState(a.reviewNote ?? '');
-  const action = usePortalAction();
-  async function review(status: string) {
-    const result = await portalCommand('review_application', { id: a.id, status, note });
-    await refresh();
-    if (result.invitationId) await sendCompanyInvitation(result.invitationId);
-  }
-  return (
-    <View style={s.stack}>
-      <PortalLink title="Volver a solicitudes" onPress={back} disabled={action.busy} />
-      <Text style={s.subtitle}>{a.businessName}</Text>
-      <Text style={s.body}>{applicationStatuses[a.status]}</Text>
-      {[
-        ['Razón social', a.legalName],
-        ['CUIT', a.taxId],
-        ['Email corporativo', a.corporateEmail],
-        ['Teléfono', a.phone],
-        ['Responsable', a.responsible],
-        ['Dirección', a.address],
-        ['Actividad', a.activity],
-        ['Sitio web', a.website],
-        ['Descripción', a.description],
-      ]
-        .filter(([, value]) => value)
-        .map(([label, value]) => (
-          <View key={label} style={{ gap: 4 }}>
-            <Text style={s.hint}>{label}</Text>
-            <Text selectable style={s.body}>
-              {value}
-            </Text>
-          </View>
-        ))}
-      <ActionButton
-        title="Ver documentación privada"
-        secondary
-        loading={action.busy}
-        onPress={() =>
-          void action.run(async () => {
-            await Linking.openURL(await companyDocumentUrl(a.documentPath, true));
-          }, 'Documentación abierta.')
-        }
-      />
-      {['SUBMITTED', 'UNDER_REVIEW'].includes(a.status) && (
-        <View style={s.section}>
-          <PortalField
-            label="Observación para el responsable"
-            value={note}
-            onChangeText={setNote}
-            multiline
-            editable={!action.busy}
-          />
-          {a.status === 'SUBMITTED' && (
-            <ActionButton
-              title="Marcar en revisión"
-              secondary
-              loading={action.busy}
-              onPress={() =>
-                void action.run(() => review('UNDER_REVIEW'), 'Solicitud en revisión.')
-              }
-            />
-          )}
-          <ActionButton
-            title="Aprobar empresa y enviar acceso"
-            loading={action.busy}
-            onPress={() =>
-              void action.run(() => review('APPROVED'), 'Empresa aprobada e invitación enviada.')
-            }
-          />
-          <ActionButton
-            title="Pedir información adicional"
-            secondary
-            loading={action.busy}
-            onPress={() =>
-              void action.run(
-                () => review('NEEDS_INFO'),
-                'Solicitud devuelta para completar información.'
-              )
-            }
-          />
-          <ActionButton
-            title="Rechazar solicitud"
-            secondary
-            loading={action.busy}
-            onPress={() => void action.run(() => review('REJECTED'), 'Solicitud rechazada.')}
-          />
-        </View>
-      )}
-      <PortalFeedback error={action.error} notice={action.notice} />
-    </View>
-  );
-}
-function Companies({
-  data,
-  refresh,
-}: Readonly<{ data: AdminPortalData; refresh: () => Promise<void> }>) {
-  const [selected, setSelected] = useState<string | null>(null),
-    [note, setNote] = useState('');
-  const action = usePortalAction();
-  const company = data.companies.find((c) => c.id === selected);
-  const application = data.applications.find((a) => a.companyId === selected);
-  return company ? (
-    <View style={s.stack}>
-      <PortalLink
-        title="Volver a empresas"
-        disabled={action.busy}
-        onPress={() => {
-          setSelected(null);
-          setNote('');
-        }}
-      />
-      <Text style={s.subtitle}>{company.name}</Text>
-      <Text style={s.body}>
-        {company.status === 'ACTIVE' ? 'Activa' : 'Suspendida'} · Límite: {company.workerLimit}{' '}
-        trabajadores
-      </Text>
-      {application && (
-        <>
-          <Text style={s.body}>
-            {application.legalName} · CUIT {application.taxId}
-          </Text>
-          <Text style={s.body}>
-            {application.corporateEmail} · {application.phone}
-          </Text>
-        </>
-      )}
-      <PortalField
-        label="Motivo de suspensión / reactivación"
-        value={note}
-        onChangeText={setNote}
-        multiline
-        editable={!action.busy}
-      />
-      <ActionButton
-        title={company.status === 'ACTIVE' ? 'Suspender empresa' : 'Reactivar empresa'}
-        secondary
-        loading={action.busy}
-        onPress={() =>
-          void action.run(async () => {
-            await portalCommand('set_company_status', {
-              id: company.id,
-              status: company.status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE',
-              note,
-            });
-            await refresh();
-          }, 'Estado de la empresa actualizado.')
-        }
-      />
-      {data.invitations
-        .filter((i) => i.companyId === company.id && i.role === 'company_owner')
-        .map((i) => (
-          <View key={i.id} style={s.section}>
-            <Text style={s.body}>Responsable pendiente: {i.email}</Text>
-            <ActionButton
-              title="Enviar / Reenviar invitación al responsable"
-              secondary
-              loading={action.busy}
-              onPress={() =>
-                void action.run(async () => {
-                  await sendCompanyInvitation(i.id);
-                  await refresh();
-                }, 'Email enviado.')
-              }
-            />
-          </View>
-        ))}
-      <PortalFeedback error={action.error} notice={action.notice} />
-    </View>
-  ) : data.companies.length === 0 ? (
-    <AdminEmpty
-      title="Todavía no hay empresas aprobadas"
-      description="Cuando apruebes una solicitud, podrás consultar la empresa y gestionar su estado desde aquí."
-    />
-  ) : (
-    <>
-      {data.companies.map((c) => (
-        <View key={c.id} style={s.row}>
-          <Text style={s.subtitle}>{c.name}</Text>
-          <Text style={s.body}>
-            {c.status === 'ACTIVE' ? 'Activa' : 'Suspendida'} · {c.workerLimit} cupos
-          </Text>
-          <PortalLink title="Ver empresa" onPress={() => setSelected(c.id)} />
-        </View>
-      ))}
-    </>
   );
 }
 function Limits({
@@ -404,13 +145,14 @@ function GlobalSettings({
     <View style={[s.stack, { maxWidth: 640, width: '100%' }]}>
       <Text style={s.subtitle}>XP global por dispositivo</Text>
       <Text style={s.body}>
-        El XP define la progresión global. Los puntos de recompensas se configuran en cada empresa.
-        Los cambios se aplicarán a nuevas operaciones.
+        El XP mide el impacto y define los niveles. Los puntos para canjear premios se configuran
+        por empresa y se suman a un único saldo. Estos cambios se aplican a nuevas entregas.
       </Text>
       {data.categories.map((c) => (
         <PortalField
           key={c.id}
           label={`${c.name} · XP`}
+          compact
           keyboardType="number-pad"
           value={values[c.id]}
           editable={!action.busy}

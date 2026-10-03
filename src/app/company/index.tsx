@@ -4,8 +4,7 @@ import { Text, View } from 'react-native';
 import { ActionButton } from '@/components/ui/ActionButton';
 import { brand } from '@/config/brand';
 import {
-  PortalPage,
-  PortalNav,
+  PortalMenuItem,
   PortalField,
   PortalLink,
   PortalLoading,
@@ -13,6 +12,9 @@ import {
   portalStyles as s,
 } from '@/components/portal/PortalUI';
 import { CompanyPointEditor } from '@/components/portal/CompanyPointEditor';
+import { AdminPage } from '@/components/portal/AdminPage';
+import { CompanyRewards } from '@/components/portal/CompanyRewards';
+import { matchesAdminSearch } from '@/models/AdminSearch';
 import { DeliveryHistory } from '@/components/delivery/DeliveryHistory';
 import { usePortalAction, usePortalData } from '@/hooks/usePortalData';
 import { activeMemberships, canManageCompany } from '@/models/Access';
@@ -29,9 +31,33 @@ export default function CompanyScreen() {
   const { data, loading, error, refresh } = usePortalData(loader);
   const memberships = activeMemberships(access);
   return (
-    <PortalPage
-      title={data?.company.name ?? company?.companyName ?? 'Mi empresa'}
-      subtitle={`${profile?.fullName ?? ''} · ${owner ? 'Responsable' : 'Trabajador'}`}
+    <AdminPage
+      title="Mi empresa"
+      name={`${data?.company.name ?? company?.companyName ?? 'Empresa'} · ${profile?.fullName ?? ''} · ${owner ? 'Responsable' : 'Trabajador'}`}
+      sections={
+        owner
+          ? [
+              'Inicio',
+              'Entregas',
+              'Puntos verdes',
+              'Premios',
+              'Datos',
+              'Puntos por categoría',
+              'Equipo',
+              'Configuraciones',
+            ]
+          : ['Inicio', 'Entregas', 'Puntos verdes', 'Premios', 'Configuraciones']
+      }
+      selected={tab}
+      onSelect={(value) => (value === 'Configuraciones' ? router.push('/settings') : setTab(value))}
+      refresh={() => void refresh()}
+      busy={action.busy || loading}
+      logout={() =>
+        void action.run(async () => {
+          await logout();
+          router.replace('/');
+        })
+      }
     >
       {memberships.length > 1 && (
         <View style={s.actions}>
@@ -47,45 +73,60 @@ export default function CompanyScreen() {
           ))}
         </View>
       )}
-      <PortalNav
-        items={
-          owner
-            ? ['Inicio', 'Entregas', 'Empresa', 'Puntos verdes', 'Puntos por categoría', 'Equipo']
-            : ['Inicio', 'Entregas', 'Puntos verdes']
-        }
-        selected={tab}
-        onSelect={setTab}
-      />
+      <PortalFeedback error={action.error} />
       <PortalLoading loading={loading} error={error} retry={() => void refresh()} />
       {data && !error && (
         <View key={`${data.company.id}:${tab}`} style={s.stack}>
           {tab === 'Inicio' && (
             <>
               <ActionButton
-                title="Escanear / Recibir entrega"
+                title="Recibir entrega o validar premio"
                 onPress={() => router.push('/company/scanner')}
               />
-              <PortalLink title="Ver historial de entregas" onPress={() => setTab('Entregas')} />
-              <Text style={s.subtitle}>Configuración inicial</Text>
+              <PortalMenuItem
+                title="Historial de entregas"
+                description="Consultá las recepciones y su estado."
+                icon="receipt-outline"
+                onPress={() => setTab('Entregas')}
+              />
+              <PortalMenuItem
+                title="Puntos verdes"
+                description={`${data.points.filter((p) => p.active).length} publicados · ${data.points.filter((p) => !p.active).length} borradores`}
+                icon="location-outline"
+                onPress={() => setTab('Puntos verdes')}
+              />
+              <PortalMenuItem
+                title="Premios de tu empresa"
+                description="Consultá los premios que tu equipo puede entregar."
+                icon="gift-outline"
+                onPress={() => setTab('Premios')}
+              />
+              {data.points.length === 0 && (
+                <PortalMenuItem
+                  title="Sumá un punto verde"
+                  description="Coordiná el alta con el equipo de TecnoRAEE."
+                  icon="leaf-outline"
+                  onPress={() => router.push('/contact?topic=point')}
+                />
+              )}
+              <Text style={s.subtitle}>Gestión de la empresa</Text>
               <Text style={s.body}>
-                {data.points.filter((p) => p.active).length} puntos publicados ·{' '}
-                {data.points.filter((p) => !p.active).length} borradores
+                {owner
+                  ? 'Administrá los datos, los puntos por entrega y el equipo.'
+                  : 'Tu acceso permite recibir entregas y validar premios.'}
               </Text>
               {owner ? (
                 <View style={s.section}>
+                  <PortalLink title="Datos de la empresa" onPress={() => setTab('Datos')} />
                   <PortalLink
-                    title="1. Revisar los datos de la empresa"
-                    onPress={() => setTab('Empresa')}
-                  />
-                  <PortalLink
-                    title="2. Publicar un punto, horarios y categorías"
+                    title="Horarios y dispositivos recibidos"
                     onPress={() => setTab('Puntos verdes')}
                   />
                   <PortalLink
-                    title="3. Configurar los puntos que otorga tu empresa"
+                    title="Puntos por dispositivo"
                     onPress={() => setTab('Puntos por categoría')}
                   />
-                  <PortalLink title="4. Invitar a tu equipo" onPress={() => setTab('Equipo')} />
+                  <PortalLink title="Equipo e invitaciones" onPress={() => setTab('Equipo')} />
                 </View>
               ) : (
                 <Text style={s.body}>
@@ -94,12 +135,13 @@ export default function CompanyScreen() {
                 </Text>
               )}
               <Text style={s.hint}>
-                Verificá físicamente los dispositivos antes de acreditar. Los retiros y canjes se
-                habilitarán en la próxima etapa.
+                Verificá físicamente los dispositivos antes de acreditar. Desde el escáner también
+                podés validar los premios publicados por los administradores para tu comercio.
               </Text>
             </>
           )}
-          {tab === 'Empresa' && owner && <CompanyProfile data={data} refresh={refresh} />}
+          {tab === 'Datos' && owner && <CompanyProfile data={data} refresh={refresh} />}
+          {tab === 'Premios' && <CompanyRewards companyId={data.company.id} />}
           {tab === 'Entregas' && (
             <DeliveryHistory key={data.company.id} companyId={data.company.id} />
           )}
@@ -110,21 +152,7 @@ export default function CompanyScreen() {
           {tab === 'Equipo' && owner && <CompanyTeam data={data} refresh={refresh} />}
         </View>
       )}
-      <View style={s.section}>
-        <PortalFeedback error={action.error} />
-        <PortalLink title="Actualizar datos" onPress={() => void refresh()} />
-        <PortalLink
-          title="Cerrar sesión"
-          disabled={action.busy}
-          onPress={() =>
-            void action.run(async () => {
-              await logout();
-              router.replace('/');
-            })
-          }
-        />
-      </View>
-    </PortalPage>
+    </AdminPage>
   );
 }
 function CompanyProfile({
@@ -139,13 +167,12 @@ function CompanyProfile({
   const action = usePortalAction();
   return (
     <View style={s.stack}>
-      <Text style={s.body}>
-        {data.details?.legalName} · CUIT {data.details?.taxId}
-      </Text>
-      <Text style={s.hint}>
-        Los datos legales se verificaron durante el alta. Contactá a {brand.name} si necesitan una
-        corrección.
-      </Text>
+      {data.details && (
+        <Text style={s.body}>
+          {data.details.legalName} · CUIT {data.details.taxId}
+        </Text>
+      )}
+      <Text style={s.hint}>Para corregir datos legales, contactá al equipo de {brand.name}.</Text>
       <PortalField
         label="Nombre comercial"
         value={name}
@@ -199,6 +226,7 @@ function CompanyPoints({
   owner,
 }: Readonly<{ data: CompanyPortalData; refresh: () => Promise<void>; owner: boolean }>) {
   const [editing, setEditing] = useState<ManagedPoint | null | undefined>(undefined);
+  const [search, setSearch] = useState('');
   if (owner && editing !== undefined)
     return (
       <CompanyPointEditor
@@ -214,30 +242,39 @@ function CompanyPoints({
     );
   return (
     <View style={s.stack}>
-      {owner && <ActionButton title="Agregar punto verde" onPress={() => setEditing(null)} />}
+      <Text style={s.body}>
+        {owner
+          ? 'Revisá la ubicación, los horarios y qué dispositivos recibe cada punto. El alta de nuevos puntos la realiza TecnoRAEE.'
+          : 'Consultá los puntos de recepción y los dispositivos que reciben.'}
+      </Text>
+      <PortalField label="Buscar puntos por nombre o ID" value={search} onChangeText={setSearch} />
       {data.points.length === 0 && (
         <Text style={s.body}>
-          Todavía no hay puntos verdes. Publicá el primero para que los ciudadanos encuentren tu
-          organización.
+          Todavía no hay puntos verdes. El equipo de TecnoRAEE coordina el alta de nuevos puntos.
         </Text>
       )}
-      {data.points.map((p) => (
-        <View key={p.id} style={s.row}>
-          <Text style={s.subtitle}>{p.name}</Text>
-          <Text style={s.body}>
-            {p.active ? 'Publicado' : 'Borrador'} ·{' '}
-            {p.pickupEnabled ? 'Con retiros' : 'Recepción en el punto'}
-          </Text>
-          <Text style={s.body}>{p.address}</Text>
-          <Text style={s.hint}>
-            {data.categories
-              .filter((c) => p.categories.includes(c.id))
-              .map((c) => c.name)
-              .join(' · ')}
-          </Text>
-          {owner && <PortalLink title="Editar punto y horarios" onPress={() => setEditing(p)} />}
-        </View>
-      ))}
+      {data.points
+        .filter((p) => matchesAdminSearch(search, p.name, p.id))
+        .map((p) => (
+          <View key={p.id} style={s.row}>
+            <Text style={s.subtitle}>{p.name}</Text>
+            <Text style={s.body}>
+              {p.active ? 'Publicado' : 'Borrador'} ·{' '}
+              {p.pickupEnabled ? 'Con retiros' : 'Recepción en el punto'}
+            </Text>
+            <Text style={s.body}>{p.address}</Text>
+            <Text selectable style={s.hint}>
+              ID: {p.id}
+            </Text>
+            <Text style={s.hint}>
+              {data.categories
+                .filter((c) => p.categories.includes(c.id))
+                .map((c) => c.name)
+                .join(' · ')}
+            </Text>
+            {owner && <PortalLink title="Editar punto y horarios" onPress={() => setEditing(p)} />}
+          </View>
+        ))}
     </View>
   );
 }
@@ -257,13 +294,14 @@ function CategoryPoints({
   return (
     <View style={s.stack}>
       <Text style={s.body}>
-        Estos puntos pertenecen a {data.company.name}. El XP global lo administra {brand.name}. La
-        acreditación ocurrirá al confirmar una recepción física.
+        Estos puntos se suman al saldo global de cada ciudadano. El XP lo administra {brand.name}.
+        Se acreditan al confirmar la recepción de los dispositivos.
       </Text>
       {data.categories.map((c) => (
         <PortalField
           key={c.id}
           label={`${c.name} · puntos por unidad`}
+          compact
           keyboardType="number-pad"
           value={values[c.id]}
           editable={!action.busy}

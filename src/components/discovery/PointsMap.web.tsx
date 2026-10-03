@@ -32,7 +32,7 @@ export function PointsMap({ points, location, preview = false, onSelect }: Point
         });
         const icon = L.divIcon({
           className: '',
-          html: '<svg width="26" height="34" viewBox="0 0 26 34" aria-hidden="true"><path fill="#17823B" stroke="white" stroke-width="2" d="M13 33S1 20 1 13a12 12 0 0 1 24 0c0 7-12 20-12 20Z"/><circle cx="13" cy="13" r="4" fill="white"/></svg>',
+          html: `<svg width="26" height="34" viewBox="0 0 26 34" aria-hidden="true"><path fill="${colors.primary}" stroke="white" stroke-width="2" d="M13 33S1 20 1 13a12 12 0 0 1 24 0c0 7-12 20-12 20Z"/><circle cx="13" cy="13" r="4" fill="white"/></svg>`,
           iconSize: [26, 34],
           iconAnchor: [13, 34],
         });
@@ -77,7 +77,13 @@ export function PointsMap({ points, location, preview = false, onSelect }: Point
       <div
         ref={element}
         aria-label="Mapa de puntos verdes"
-        style={{ height: preview ? 230 : 380, width: '100%', borderRadius: 8, zIndex: 0 }}
+        style={{
+          height: preview ? 230 : 380,
+          width: '100%',
+          borderRadius: 14,
+          overflow: 'hidden',
+          zIndex: 0,
+        }}
       />
       {error && (
         <Text style={{ color: colors.text, fontFamily: fonts.regular }}>

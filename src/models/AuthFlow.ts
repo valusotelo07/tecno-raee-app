@@ -8,7 +8,7 @@ export function parseAuthIntent(value: string | string[] | undefined): AuthInten
 
 // Intent records where the user was going. Supabase permissions still decide access.
 export function authDestination(intent: AuthIntent) {
-  return intent === 'application' ? '/company-application' : '/company-invitations';
+  return intent === 'application' ? '/contact' : '/company-invitations';
 }
 
 export function authRoute(pathname: '/login' | '/register', intent: AuthIntent | null) {

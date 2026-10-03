@@ -1,7 +1,7 @@
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { ActionButton } from '@/components/ui/ActionButton';
 import { DiscoveryState } from '@/components/discovery/DiscoveryState';
 import { PointsMap } from '@/components/discovery/PointsMap';
@@ -9,6 +9,7 @@ import { PointRow } from '@/components/discovery/PointRow';
 import { SearchBar } from '@/components/discovery/SearchBar';
 import { filterGreenPoints, type GreenPoint } from '@/models/GreenPoint';
 import { useDiscovery } from '@/providers/DiscoveryProvider';
+import { useScrollReset } from '@/hooks/useScrollReset';
 import { colors, fonts } from '@/theme';
 
 function FilterButton({
@@ -41,6 +42,7 @@ function GreenPointsExplorer({
   initialSearch,
   initialCategory,
 }: Readonly<{ initialSearch: string; initialCategory: string }>) {
+  const scroll = useScrollReset();
   const {
     points,
     categories,
@@ -53,6 +55,11 @@ function GreenPointsExplorer({
     requestLocation,
     now,
   } = useDiscovery();
+  useFocusEffect(
+    useCallback(() => {
+      refresh();
+    }, [refresh])
+  );
   const [search, setSearch] = useState(initialSearch);
   const [categoryId, setCategoryId] = useState(initialCategory);
   const [companyId, setCompanyId] = useState('');
@@ -90,9 +97,13 @@ function GreenPointsExplorer({
     setNearbyOnly(false);
   };
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.content}>
-        <Text style={styles.title}>Puntos verdes</Text>
+    <View style={styles.container}>
+      <ScreenHeader title="Puntos verdes" />
+      <ScrollView
+        ref={scroll}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={styles.content}
+      >
         <SearchBar value={search} onChangeText={setSearch} />
         <ActionButton
           title={location ? 'Actualizar mi ubicación' : 'Usar mi ubicación'}
@@ -214,7 +225,7 @@ function GreenPointsExplorer({
           </>
         )}
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 const styles = StyleSheet.create({
@@ -227,7 +238,6 @@ const styles = StyleSheet.create({
     gap: 16,
     paddingBottom: 32,
   },
-  title: { fontFamily: fonts.bold, fontSize: 28, color: colors.primary },
   text: { fontFamily: fonts.regular, fontSize: 14, lineHeight: 21, color: colors.brandDark },
   label: { fontFamily: fonts.semiBold, fontSize: 15, color: colors.text },
   filters: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },

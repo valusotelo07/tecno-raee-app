@@ -14,7 +14,6 @@ import {
 import { AuthTextField } from '@/components/auth/AuthTextField';
 import { login } from '@/services/auth.service';
 import { colors, fonts } from '@/theme';
-import { brand } from '@/config/brand';
 import { authRoute, parseAuthIntent } from '@/models/AuthFlow';
 import { useAuth } from '@/providers/AuthProvider';
 
@@ -63,8 +62,6 @@ export default function LoginScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.screen}>
-          <Text style={styles.logo}>{brand.authName}</Text>
-
           <Text style={styles.subtitle}>Accedé a tu cuenta</Text>
 
           {/* Correo */}
@@ -159,176 +156,52 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  feedback: {
-    position: 'absolute',
-    top: 530,
-    left: 30,
-    width: 330,
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    lineHeight: 21,
-    color: colors.text,
-  },
-  error: { color: colors.danger },
-  container: {
-    flex: 1,
-    backgroundColor: colors.surface,
-  },
-
-  scrollContent: {
-    flexGrow: 1,
-    backgroundColor: colors.surface,
-  },
-
-  screen: {
-    position: 'relative',
-    width: '100%',
-    maxWidth: 390,
-    minHeight: 844,
-    alignSelf: 'center',
-    backgroundColor: colors.surface,
-  },
-
-  logo: {
-    position: 'absolute',
-    left: 84,
-    top: 107,
-
-    fontFamily: fonts.bold,
-    fontWeight: '700',
-    fontSize: 32,
-    lineHeight: 39,
-
-    color: colors.primary,
-  },
+  container: { flex: 1, backgroundColor: colors.background },
+  scrollContent: { flexGrow: 1, padding: 24, paddingBottom: 32 },
+  screen: { width: '100%', maxWidth: 420, alignSelf: 'center', gap: 18 },
+  pressed: { opacity: 0.75 },
+  disabled: { opacity: 0.6 },
+  error: { fontFamily: fonts.regular, fontSize: 14, lineHeight: 21, color: colors.danger },
 
   subtitle: {
-    position: 'absolute',
-    width: 197,
-    left: 102,
-    top: 162,
-
     fontFamily: fonts.regular,
-    fontWeight: '400',
-    fontSize: 16,
-    lineHeight: 19,
-    textAlign: 'center',
-
-    color: colors.primary,
+    fontSize: 15,
+    lineHeight: 22,
+    color: colors.textSecondary,
   },
-
-  emailField: {
-    position: 'absolute',
-    width: 330,
-    height: 76,
-    left: 30,
-    top: 227,
-  },
-
-  passwordField: {
-    position: 'absolute',
-    width: 330,
-    height: 76,
-    left: 30,
-    top: 326,
-  },
-
-  forgotPassword: {
-    position: 'absolute',
-    left: 38,
-    top: 410,
-
-    width: 182,
-    height: 24,
-
-    justifyContent: 'center',
-  },
-
-  forgotPasswordText: {
-    fontFamily: fonts.regular,
-    fontWeight: '400',
-    fontSize: 14,
-    lineHeight: 17,
-
-    color: colors.text,
-  },
-
+  emailField: { width: '100%' },
+  passwordField: { width: '100%' },
+  forgotPassword: { minHeight: 44, alignSelf: 'flex-end', justifyContent: 'center' },
+  forgotPasswordText: { fontFamily: fonts.regular, fontSize: 14, color: colors.primaryDark },
   loginButton: {
-    position: 'absolute',
-    width: 326,
-    height: 50,
-    left: 32,
-    top: 457,
-
+    minHeight: 52,
+    alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: colors.primary,
     borderRadius: 12,
-
-    alignItems: 'center',
-    justifyContent: 'center',
   },
-
-  loginButtonText: {
-    fontFamily: fonts.semiBold,
-    fontWeight: '600',
-    fontSize: 14,
-    lineHeight: 17,
-
-    color: colors.textOnPrimary,
-  },
-
-  createAccountSection: {
-    position: 'absolute',
-    width: 326,
-    height: 80,
-    left: 32,
-    top: 709,
-  },
-
-  createAccountLabel: {
-    width: '100%',
-    height: 30,
-
+  loginButtonText: { fontFamily: fonts.semiBold, fontSize: 14, color: colors.textOnPrimary },
+  feedback: {
     fontFamily: fonts.regular,
-    fontWeight: '400',
+    fontSize: 15,
+    lineHeight: 22,
+    color: colors.textSecondary,
+  },
+  createAccountSection: { gap: 12, marginTop: 24 },
+  createAccountLabel: {
+    fontFamily: fonts.regular,
     fontSize: 14,
-    lineHeight: 17,
     textAlign: 'center',
-
     color: colors.text,
   },
-
   createAccountButton: {
-    position: 'absolute',
-    left: 0,
-    bottom: 0,
-
-    width: 326,
-    height: 50,
-
-    backgroundColor: colors.surface,
-
-    borderWidth: 1,
-    borderColor: colors.borderPrimary,
-    borderRadius: 12,
-
+    minHeight: 52,
     alignItems: 'center',
     justifyContent: 'center',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.borderPrimary,
+    backgroundColor: colors.surface,
   },
-
-  createAccountButtonText: {
-    fontFamily: fonts.semiBold,
-    fontWeight: '600',
-    fontSize: 14,
-    lineHeight: 17,
-
-    color: colors.primary,
-  },
-
-  pressed: {
-    opacity: 0.75,
-  },
-
-  disabled: {
-    opacity: 0.6,
-  },
+  createAccountButtonText: { fontFamily: fonts.semiBold, fontSize: 14, color: colors.primaryDark },
 });

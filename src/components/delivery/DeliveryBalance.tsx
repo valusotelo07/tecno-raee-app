@@ -1,43 +1,29 @@
-import { useFocusEffect } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { useCallback } from 'react';
-import { Text, View } from 'react-native';
-import { PortalLoading, portalStyles as s } from '@/components/portal/PortalUI';
-import { usePortalData } from '@/hooks/usePortalData';
-import { getDeliveryBalance } from '@/services/delivery.service';
-
+import { View } from 'react-native';
+import { PointsCard } from '@/components/rewards/RewardsUI';
+import { PortalLink } from '@/components/portal/PortalUI';
+import { useWallet } from '@/providers/WalletProvider';
 export function DeliveryBalance() {
-  const { data, loading, error, refresh } = usePortalData(getDeliveryBalance);
+  const { data, loading, error, refresh } = useWallet();
   useFocusEffect(
     useCallback(() => {
       void refresh();
     }, [refresh])
   );
   return (
-    <View style={s.stack}>
-      <PortalLoading loading={loading} error={error} retry={() => void refresh()} />
+    <View style={{ gap: 8 }}>
+      <PointsCard
+        points={data?.points ?? null}
+        loading={loading}
+        error={error}
+        onPress={() => (error ? void refresh() : router.push('/my-points'))}
+      />
       {data && (
-        <>
-          <Text style={s.subtitle}>
-            {data.xp} XP · {data.level?.name ?? 'Sin nivel configurado'}
-          </Text>
-          {data.nextLevel && (
-            <Text style={s.body}>
-              Faltan {data.nextLevel.minimumXp - data.xp} XP para {data.nextLevel.name}.
-            </Text>
-          )}
-          <Text style={s.body}>Tus puntos por empresa</Text>
-          {data.companies.length ? (
-            data.companies.map((c) => (
-              <Text key={c.id} style={s.body}>
-                {c.name}: {c.points} puntos
-              </Text>
-            ))
-          ) : (
-            <Text style={s.hint}>
-              Se acreditan al confirmar tus entregas. Cada empresa tiene su propio saldo.
-            </Text>
-          )}
-        </>
+        <PortalLink
+          title={`${data.xp.toLocaleString('es-AR')} XP · ${data.level?.name ?? 'Ver mi impacto'} ›`}
+          onPress={() => router.push('/impact')}
+        />
       )}
     </View>
   );

@@ -200,27 +200,70 @@ export async function getCompanyPortal(companyId: string): Promise<CompanyPortal
 export async function getAdminPortal(): Promise<AdminPortalData> {
   const results = await Promise.all([
     supabase.from('companies').select('*').order('name'),
-    supabase.from('company_applications').select('*').order('created_at', { ascending: false }),
     supabase
       .from('company_limit_requests')
       .select('*, companies(name)')
       .order('created_at', { ascending: false }),
     supabase.from('device_categories').select('*').order('sort_order'),
     supabase.from('impact_levels').select('*').order('minimum_xp'),
-    supabase.from('company_invitations').select('*, companies(name)').eq('status', 'INVITED'),
   ]);
   for (const result of results) if (result.error) throw result.error;
   return {
     companies: (results[0].data ?? []).map(company),
-    applications: (results[1].data ?? []).map(mapApplication),
-    limitRequests: (results[2].data ?? []).map(limit),
-    categories: (results[3].data ?? []).map(category),
-    levels: (results[4].data ?? []).map((l) => ({
+    limitRequests: (results[1].data ?? []).map(limit),
+    categories: (results[2].data ?? []).map(category),
+    levels: (results[3].data ?? []).map((l) => ({
       id: l.id,
       name: l.name,
       minimumXp: l.minimum_xp,
     })),
-    invitations: (results[5].data ?? []).map(invitation),
+  };
+}
+export interface AdminPointSummary {
+  id: string;
+  name: string;
+  address: string;
+  companyId: string;
+  active: boolean;
+}
+export async function getAdminPoints(): Promise<AdminPointSummary[]> {
+  const points: AdminPointSummary[] = [];
+  for (let start = 0; ; start += 500) {
+    const { data, error } = await supabase
+      .from('green_points')
+      .select('id,name,address,company_id,active')
+      .order('name')
+      .order('id')
+      .range(start, start + 499);
+    if (error) throw error;
+    points.push(
+      ...(data ?? []).map((p) => ({
+        id: p.id,
+        name: p.name,
+        address: p.address,
+        companyId: p.company_id,
+        active: p.active,
+      }))
+    );
+    if (!data || data.length < 500) return points;
+  }
+}
+export async function getNewPointData(): Promise<CompanyPortalData> {
+  const { data, error } = await supabase
+    .from('device_categories')
+    .select('*')
+    .eq('active', true)
+    .order('sort_order');
+  if (error) throw error;
+  return {
+    company: { id: '', name: '', status: 'ACTIVE', workerLimit: 20 },
+    details: null,
+    points: [],
+    categories: (data ?? []).map(category),
+    categoryPoints: [],
+    members: [],
+    invitations: [],
+    limitRequests: [],
   };
 }
 export async function pickCompanyDocument(

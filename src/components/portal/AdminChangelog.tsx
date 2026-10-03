@@ -6,31 +6,19 @@ import { auditNames, changelogChanges } from '@/models/Changelog';
 import { getChangelog } from '@/services/portal.service';
 import { colors } from '@/theme';
 import { AdminEmpty } from './AdminPage';
-import { PortalField, PortalLink, PortalLoading, PortalNav, portalStyles as s } from './PortalUI';
+import { PortalField, PortalLink, PortalLoading, portalStyles as s } from './PortalUI';
 
 export function AdminChangelog() {
   const [page, setPage] = useState(0);
-  const [scope, setScope] = useState('Administradores');
   const [draft, setDraft] = useState('');
   const [search, setSearch] = useState('');
-  const loader = useCallback(
-    () => getChangelog(page * 25, search, scope === 'Administradores'),
-    [page, search, scope]
-  );
+  const loader = useCallback(() => getChangelog(page * 25, search, true), [page, search]);
   const { data, loading, error, refresh } = usePortalData(loader);
   return (
     <View style={s.stack}>
       <Text style={s.body}>
-        Registro de operaciones, con fecha, autor y detalle de los cambios.
+        Acciones de administradores, con fecha, autor y detalle de los cambios.
       </Text>
-      <PortalNav
-        items={['Administradores', 'Todas las cuentas']}
-        selected={scope}
-        onSelect={(value) => {
-          setScope(value);
-          setPage(0);
-        }}
-      />
       <View style={{ gap: 12, maxWidth: 640 }}>
         <PortalField
           label="Buscar por persona, empresa o referencia"

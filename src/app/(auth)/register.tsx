@@ -13,8 +13,7 @@ import {
 } from 'react-native';
 
 import { AuthTextField } from '@/components/auth/AuthTextField';
-import { colors } from '@/theme';
-import { brand } from '@/config/brand';
+import { colors, fonts } from '@/theme';
 import { register } from '@/services/auth.service';
 import { authRoute, parseAuthIntent } from '@/models/AuthFlow';
 import { useAuth } from '@/providers/AuthProvider';
@@ -22,6 +21,7 @@ import { useAuth } from '@/providers/AuthProvider';
 export default function CreateAccountScreen() {
   const params = useLocalSearchParams<{ intent?: string }>();
   const intent = parseAuthIntent(params.intent);
+  const registrationIntent = intent === 'invitations' ? intent : null;
   const { prepareAuth } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [name, setName] = useState('');
@@ -64,15 +64,15 @@ export default function CreateAccountScreen() {
 
     try {
       setLoading(true);
-      prepareAuth(intent);
+      prepareAuth(registrationIntent);
 
       const { session } = await register({ name, email, password });
       if (session) {
         router.replace('/');
       } else {
         router.replace({
-          ...authRoute('/login', intent),
-          params: { ...(intent ? { intent } : {}), confirm: '1' },
+          ...authRoute('/login', registrationIntent),
+          params: { ...(registrationIntent ? { intent: registrationIntent } : {}), confirm: '1' },
         });
       }
     } catch (error) {
@@ -96,9 +96,25 @@ export default function CreateAccountScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.screen}>
-          <Text style={styles.logo}>{brand.authName}</Text>
+          <View style={styles.heading}>
+            <Text style={styles.subtitle}>Reciclá tecnología, sumá puntos y disfrutá premios.</Text>
+          </View>
 
-          <Text style={styles.subtitle}>Comenzá a reciclar</Text>
+          <Pressable
+            accessibilityRole="button"
+            disabled={loading}
+            onPress={() => router.push({ pathname: '/contact', params: { topic: 'point' } })}
+            style={({ pressed }) => [styles.companyLink, pressed && styles.pressed]}
+          >
+            <Ionicons name="location-outline" size={23} color={colors.primary} />
+            <View style={{ flex: 1, gap: 4 }}>
+              <Text style={styles.companyTitle}>¿Querés sumarte como punto verde?</Text>
+              <Text style={styles.companyHint}>
+                Sumate a cuidar el planeta. Cada punto verde hace la diferencia.
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={colors.primary} />
+          </Pressable>
 
           {/* Nombre */}
           <View style={styles.nameField}>
@@ -197,6 +213,7 @@ export default function CreateAccountScreen() {
 
           {/* Crear cuenta */}
           <Pressable
+            accessibilityRole="button"
             style={({ pressed }) => [
               styles.createButton,
               pressed && styles.pressed,
@@ -218,7 +235,8 @@ export default function CreateAccountScreen() {
 
             <Pressable
               style={({ pressed }) => [styles.loginButton, pressed && styles.pressed]}
-              onPress={() => router.replace(authRoute('/login', intent))}
+              accessibilityRole="button"
+              onPress={() => router.replace(authRoute('/login', registrationIntent))}
               disabled={loading}
             >
               <Text style={styles.loginButtonText}>Iniciar Sesión</Text>
@@ -231,180 +249,64 @@ export default function CreateAccountScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.surface,
-  },
-
-  scrollContent: {
-    flexGrow: 1,
-    backgroundColor: colors.surface,
-  },
-
-  screen: {
-    position: 'relative',
-    width: '100%',
-    maxWidth: 390,
-    minHeight: 900,
-    alignSelf: 'center',
-
-    backgroundColor: colors.surface,
-  },
-
-  logo: {
-    position: 'absolute',
-    left: 84,
-    top: 107,
-
-    fontFamily: 'Inter',
-    fontWeight: '700',
-    fontSize: 32,
-    lineHeight: 39,
-
-    color: colors.primary,
-  },
-
+  container: { flex: 1, backgroundColor: colors.background },
+  scrollContent: { flexGrow: 1, paddingHorizontal: 24, paddingTop: 24, paddingBottom: 32 },
+  screen: { width: '100%', maxWidth: 420, alignSelf: 'center', gap: 18 },
+  heading: { gap: 8, marginBottom: 6 },
   subtitle: {
-    position: 'absolute',
-    width: 330,
-    left: 30,
-    top: 158,
-
-    fontFamily: 'Inter',
-    fontWeight: '400',
-    fontSize: 16,
-    lineHeight: 19,
+    fontFamily: fonts.regular,
+    fontSize: 15,
+    lineHeight: 22,
+    color: colors.textSecondary,
     textAlign: 'center',
-
-    color: colors.primary,
   },
-
-  nameField: {
-    position: 'absolute',
-    width: 330,
-    height: 76,
-    left: 30,
-    top: 233,
-  },
-
-  emailField: {
-    position: 'absolute',
-    width: 330,
-    height: 76,
-    left: 30,
-    top: 332,
-  },
-
-  passwordField: {
-    position: 'absolute',
-    width: 330,
-    height: 76,
-    left: 30,
-    top: 431,
-  },
-
-  confirmPasswordField: {
-    position: 'absolute',
-    width: 330,
-    height: 76,
-    left: 30,
-    top: 534,
-  },
-
-  eyeButton: {
-    width: 45,
-    height: '100%',
-
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
+  nameField: { width: '100%' },
+  emailField: { width: '100%' },
+  passwordField: { width: '100%' },
+  confirmPasswordField: { width: '100%' },
+  eyeButton: { width: 45, height: '100%', alignItems: 'center', justifyContent: 'center' },
   createButton: {
-    position: 'absolute',
-    width: 326,
-    height: 50,
-    left: 32,
-    top: 683,
-
+    minHeight: 50,
+    marginTop: 6,
     backgroundColor: colors.primary,
-    borderRadius: 12,
-
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
   },
-
-  createButtonText: {
-    fontFamily: 'Inter',
-    fontWeight: '600',
-    fontSize: 14,
-    lineHeight: 17,
-
-    color: colors.textOnPrimary,
-  },
-
-  loginSection: {
-    position: 'absolute',
-    width: 326,
-    height: 74,
-    left: 32,
-    top: 771,
-  },
-
+  createButtonText: { fontFamily: fonts.semiBold, fontSize: 16, color: colors.textOnPrimary },
+  loginSection: { gap: 8 },
   loginLabel: {
-    width: '100%',
-    height: 24,
-
-    fontFamily: 'Inter',
-    fontWeight: '400',
+    fontFamily: fonts.regular,
     fontSize: 14,
-    lineHeight: 17,
     textAlign: 'center',
-
-    color: colors.text,
+    color: colors.textSecondary,
   },
-
   loginButton: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-
-    width: 326,
-    height: 50,
-
-    backgroundColor: colors.surface,
-
+    minHeight: 50,
     borderWidth: 1,
-    borderColor: colors.borderPrimary,
-    borderRadius: 12,
-
+    borderColor: colors.primary,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
   },
-
-  loginButtonText: {
-    fontFamily: 'Inter',
-    fontWeight: '600',
-    fontSize: 14,
-    lineHeight: 17,
-
-    color: colors.primary,
+  loginButtonText: { fontFamily: fonts.semiBold, fontSize: 15, color: colors.primary },
+  companyLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    padding: 16,
+    minHeight: 80,
+    borderRadius: 16,
+    backgroundColor: colors.primarySoft,
   },
-
-  pressed: {
-    opacity: 0.75,
+  companyTitle: { fontFamily: fonts.semiBold, fontSize: 15, color: colors.primaryDark },
+  companyHint: {
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    lineHeight: 18,
+    color: colors.textSecondary,
   },
-
-  disabled: {
-    opacity: 0.6,
-  },
-  error: {
-    position: 'absolute',
-    left: 30,
-    top: 619,
-    width: 330,
-    fontFamily: 'Inter',
-    fontSize: 14,
-    lineHeight: 20,
-    color: colors.danger,
-  },
+  pressed: { opacity: 0.75 },
+  disabled: { opacity: 0.6 },
+  error: { fontFamily: fonts.regular, fontSize: 14, lineHeight: 20, color: colors.danger },
 });

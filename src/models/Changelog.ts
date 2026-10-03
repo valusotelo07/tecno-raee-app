@@ -1,4 +1,9 @@
 export const auditNames: Record<string, string> = {
+  admin_edit_users: 'Usuario editado por administrador',
+  admin_edit_companies: 'Empresa editada por administrador',
+  reward_saved: 'Premio guardado por administrador',
+  reward_reserved: 'Premio reservado',
+  reward_redeemed: 'Premio entregado',
   delivery_created: 'Entrega registrada',
   delivery_cancelled: 'Entrega cancelada',
   delivery_confirmed: 'Recepción confirmada',
@@ -8,6 +13,7 @@ export const auditNames: Record<string, string> = {
   accept_invitation: 'Invitación aceptada',
   save_company: 'Empresa actualizada',
   save_point: 'Punto verde guardado',
+  create_point_organization: 'Institución incorporada a la red',
   save_points: 'Puntos por categoría actualizados',
   invite_worker: 'Trabajador invitado',
   cancel_invitation: 'Invitación cancelada',

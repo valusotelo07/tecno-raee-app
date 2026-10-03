@@ -15,7 +15,6 @@ import {
 import { AuthTextField } from '@/components/auth/AuthTextField';
 import { sendRecoveryCode, verifyRecoveryCode } from '@/services/auth.service';
 import { colors, fonts } from '@/theme';
-import { brand } from '@/config/brand';
 
 const OTP_LENGTH = 6;
 const OTP_SLOTS = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth'] as const;
@@ -106,10 +105,6 @@ export default function ForgotPasswordScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.screen}>
-          <Text style={styles.logo}>{brand.authName}</Text>
-
-          <Text style={styles.subtitle}>Recuperá tu Contraseña</Text>
-
           <Text style={styles.description}>
             Ingresá el correo asociado a tu cuenta.{'\n'}
             Te enviaremos un código para recuperarla.
@@ -222,244 +217,65 @@ export default function ForgotPasswordScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.surface,
-  },
-
-  scrollContent: {
-    flexGrow: 1,
-    backgroundColor: colors.surface,
-  },
-
-  screen: {
-    position: 'relative',
-    width: '100%',
-    maxWidth: 390,
-    minHeight: 844,
-    alignSelf: 'center',
-    backgroundColor: colors.surface,
-  },
-
-  logo: {
-    position: 'absolute',
-    left: 84,
-    top: 107,
-
-    fontFamily: fonts.bold,
-    fontSize: 32,
-    lineHeight: 39,
-    fontWeight: '700',
-
-    color: colors.primary,
-  },
-
-  subtitle: {
-    position: 'absolute',
-    width: 197,
-    left: 102,
-    top: 158,
-
-    fontFamily: fonts.regular,
-    fontSize: 16,
-    lineHeight: 19,
-    fontWeight: '400',
-    textAlign: 'center',
-
-    color: colors.primary,
-  },
+  container: { flex: 1, backgroundColor: colors.background },
+  scrollContent: { flexGrow: 1, padding: 24, paddingBottom: 32 },
+  screen: { width: '100%', maxWidth: 420, alignSelf: 'center', gap: 18 },
+  pressed: { opacity: 0.75 },
+  disabled: { opacity: 0.6 },
+  error: { fontFamily: fonts.regular, fontSize: 14, lineHeight: 21, color: colors.danger },
 
   description: {
-    position: 'absolute',
-    width: 315,
-    left: 29,
-    top: 271,
-
     fontFamily: fonts.regular,
-    fontSize: 14,
-    lineHeight: 17,
-    fontWeight: '400',
-    textAlign: 'center',
-
-    color: colors.text,
+    fontSize: 15,
+    lineHeight: 22,
+    color: colors.textSecondary,
   },
-
-  emailContainer: {
-    position: 'absolute',
-
-    left: 32,
-    top: 326,
-
-    width: 326,
-  },
-
+  emailContainer: { width: '100%' },
   sendButton: {
     width: 70,
-    height: 36,
-
-    marginRight: 13,
-
+    minHeight: 40,
+    marginRight: 8,
     alignItems: 'center',
     justifyContent: 'center',
-
     borderRadius: 8,
     backgroundColor: colors.primary,
   },
-
-  sendButtonText: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    fontWeight: '400',
-
-    color: colors.textOnPrimary,
-  },
-
+  sendButtonText: { fontFamily: fonts.semiBold, fontSize: 14, color: colors.textOnPrimary },
   codeDescription: {
-    position: 'absolute',
-
-    left: 32,
-    top: 474,
-
-    width: 326,
-
     fontFamily: fonts.regular,
-    fontSize: 14,
-    lineHeight: 20,
-    textAlign: 'center',
-
-    color: colors.text,
+    fontSize: 15,
+    lineHeight: 22,
+    color: colors.textSecondary,
   },
-
-  otpContainer: {
-    position: 'absolute',
-
-    left: 29,
-    top: 538,
-
-    width: 332,
-    height: 52,
-
-    flexDirection: 'row',
-    gap: 4,
-  },
-
+  otpContainer: { width: '100%', height: 52, flexDirection: 'row', gap: 4 },
   otpBox: {
-    width: 52,
+    flex: 1,
     height: 52,
-
     alignItems: 'center',
     justifyContent: 'center',
-
-    backgroundColor: colors.background,
-
+    backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: 10,
   },
-
-  otpBoxFocused: {
-    borderColor: colors.primary,
-  },
-
-  otpDigit: {
-    fontFamily: fonts.regular,
-    fontSize: 18,
-    fontWeight: '500',
-
-    color: colors.text,
-  },
-
-  hiddenOtpInput: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-    opacity: 0,
-  },
-
+  otpBoxFocused: { borderColor: colors.primary },
+  otpDigit: { fontFamily: fonts.regular, fontSize: 18, color: colors.text },
+  hiddenOtpInput: { position: 'absolute', width: '100%', height: '100%', opacity: 0 },
   didNotReceive: {
-    position: 'absolute',
-
-    left: 28,
-    top: 604,
-
-    width: 159,
-
     fontFamily: fonts.regular,
-    fontSize: 14,
-    lineHeight: 17,
-
-    color: colors.text,
+    fontSize: 15,
+    lineHeight: 22,
+    color: colors.textSecondary,
   },
-
-  resendButton: {
-    position: 'absolute',
-
-    left: 204,
-    top: 590,
-
-    width: 98,
-    height: 48,
-
-    justifyContent: 'center',
-  },
-
-  resendText: {
-    fontFamily: fonts.bold,
-    fontSize: 14,
-    lineHeight: 17,
-    fontWeight: '700',
-    textAlign: 'center',
-
-    color: colors.text,
-  },
-
+  resendButton: { minHeight: 44, alignSelf: 'flex-end', justifyContent: 'center' },
+  resendText: { fontFamily: fonts.semiBold, fontSize: 14, color: colors.primaryDark },
   verifyButton: {
-    position: 'absolute',
-
-    left: 32,
-    top: 656,
-
-    width: 326,
-    height: 50,
-
+    minHeight: 52,
     alignItems: 'center',
     justifyContent: 'center',
-
     backgroundColor: colors.primary,
     borderRadius: 12,
   },
-
-  verifyButtonText: {
-    fontFamily: fonts.semiBold,
-    fontSize: 14,
-    lineHeight: 17,
-    fontWeight: '600',
-
-    color: colors.textOnPrimary,
-  },
-
-  pressed: {
-    opacity: 0.75,
-  },
-  disabled: { opacity: 0.5 },
-  notice: {
-    position: 'absolute',
-    left: 32,
-    top: 394,
-    width: 326,
-    fontFamily: fonts.semiBold,
-    fontSize: 14,
-    lineHeight: 21,
-    color: colors.primary,
-  },
-  error: {
-    position: 'absolute',
-    left: 32,
-    top: 728,
-    width: 326,
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    lineHeight: 21,
-    color: colors.danger,
-  },
+  verifyButtonText: { fontFamily: fonts.semiBold, fontSize: 14, color: colors.textOnPrimary },
+  notice: { fontFamily: fonts.semiBold, fontSize: 14, lineHeight: 21, color: colors.primary },
 });

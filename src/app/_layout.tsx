@@ -3,19 +3,16 @@ import { StatusBar } from 'expo-status-bar';
 
 import { AuthProvider, useAuth } from '@/providers/AuthProvider';
 import { DiscoveryProvider } from '@/providers/DiscoveryProvider';
+import { WalletProvider } from '@/providers/WalletProvider';
 import { canAccessCitizen } from '@/models/Access';
-import {
-  Inter_400Regular,
-  Inter_600SemiBold,
-  Inter_700Bold,
-  useFonts,
-} from '@expo-google-fonts/inter';
+import { useFonts } from 'expo-font';
+import { Roboto_400Regular, Roboto_500Medium, Roboto_700Bold } from '@expo-google-fonts/roboto';
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
-    Inter_400Regular,
-    Inter_600SemiBold,
-    Inter_700Bold,
+    Roboto_400Regular,
+    Roboto_500Medium,
+    Roboto_700Bold,
   });
 
   if (!fontsLoaded) {
@@ -27,7 +24,9 @@ export default function RootLayout() {
       <StatusBar style="dark" />
 
       <DiscoveryProvider>
-        <Navigation />
+        <WalletProvider>
+          <Navigation />
+        </WalletProvider>
       </DiscoveryProvider>
     </AuthProvider>
   );
@@ -41,15 +40,23 @@ function Navigation() {
       <Stack.Screen name="portal-access" />
       <Stack.Screen name="company-application" />
       <Stack.Screen name="company-invitations" />
+      <Stack.Screen name="settings" />
+      <Stack.Screen name="terms" />
+      <Stack.Screen name="contact" />
       <Stack.Protected guard={!session || recoveringPassword}>
         <Stack.Screen name="(auth)" />
       </Stack.Protected>
       <Stack.Protected guard={!loading && !recoveringPassword && canAccessCitizen(role, guest)}>
         <Stack.Screen name="(app)" />
+        <Stack.Screen name="my-raee" />
         <Stack.Screen name="device-categories" />
         <Stack.Screen name="point/[id]" />
         <Stack.Screen name="new-delivery" />
         <Stack.Screen name="delivery/[id]" />
+        <Stack.Screen name="my-points" />
+        <Stack.Screen name="impact" />
+        <Stack.Screen name="reward/[id]" />
+        <Stack.Screen name="redemption/[id]" />
       </Stack.Protected>
       <Stack.Protected
         guard={

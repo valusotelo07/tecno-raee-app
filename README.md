@@ -2,6 +2,8 @@
 
 La descripción funcional del proyecto, los recorridos por rol y los pendientes están en [Proyecto y funcionalidades](PROYECTO_Y_FEATURES.md).
 
+El [lenguaje de diseño](DESIGN.md) es obligatorio para quienes trabajen en la interfaz. Define la identidad basada en la vista del ciudadano, los componentes compartidos, el header común, los estilos y los criterios de revisión para ciudadano, empresa y admin. Leerlo antes de cambiar pantallas; [AGENTS.md](AGENTS.md) establece la misma obligación para los agentes.
+
 El nombre comercial está centralizado en `src/config/brand.json`. La guía [Cambiar el nombre de la app](CAMBIO_DE_NOMBRE.md) explica cómo actualizarlo, revisar los recursos visuales y conservar los identificadores compatibles con los datos y enlaces existentes.
 
 Aplicación de gestión de RAEE con React Native, Expo SDK 57, Expo Router, TypeScript y Supabase. El código activo está en `src/app/`; servicios en `src/services/`, modelos en `src/models/` y estilos compartidos en `src/theme/`.

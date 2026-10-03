@@ -1,23 +1,34 @@
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { router } from 'expo-router';
-import { useCallback, useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useMemo } from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { QuickAccess } from '@/components/home/QuickAccess';
+import { HomeBotanical, ImpactPlant, LeafMark } from '@/components/ui/EcoArtwork';
 import { ActionButton } from '@/components/ui/ActionButton';
 import { PortalLink } from '@/components/portal/PortalUI';
+import { PointsCard } from '@/components/rewards/RewardsUI';
 import { PointsMap } from '@/components/discovery/PointsMap';
 import { PointRow } from '@/components/discovery/PointRow';
-import { SearchBar } from '@/components/discovery/SearchBar';
 import { DiscoveryState } from '@/components/discovery/DiscoveryState';
 import { filterGreenPoints, type GreenPoint } from '@/models/GreenPoint';
 import { useAuth } from '@/providers/AuthProvider';
+import { useWallet } from '@/providers/WalletProvider';
 import { useDiscovery } from '@/providers/DiscoveryProvider';
 import { colors, fonts } from '@/theme';
 import { brand } from '@/config/brand';
+import { useScrollReset } from '@/hooks/useScrollReset';
 
 export default function HomeScreen() {
-  const { profile } = useAuth();
+  const scroll = useScrollReset();
+  const { profile, session } = useAuth();
+  const wallet = useWallet();
+  const { refresh: refreshWallet } = wallet;
+  useFocusEffect(
+    useCallback(() => {
+      void refreshWallet();
+    }, [refreshWallet])
+  );
   const {
     points,
     loading,
@@ -29,7 +40,11 @@ export default function HomeScreen() {
     requestLocation,
     now,
   } = useDiscovery();
-  const [search, setSearch] = useState('');
+  useFocusEffect(
+    useCallback(() => {
+      refresh();
+    }, [refresh])
+  );
   const sorted = useMemo(() => filterGreenPoints(points, {}, location), [points, location]);
   const openPoint = useCallback(
     (point: GreenPoint) => router.push({ pathname: '/point/[id]', params: { id: point.id } }),
@@ -37,48 +52,97 @@ export default function HomeScreen() {
   );
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <Text style={styles.brand}>{brand.name}</Text>
-        <View style={styles.intro}>
-          <Text style={styles.greeting}>
-            Hola, {profile?.fullName.split(' ')[0] || 'visitante'}
-          </Text>
-          <Text style={styles.description}>Encontrá dónde llevar tu tecnología en desuso.</Text>
+      <ScrollView
+        ref={scroll}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.header}>
+          <View style={styles.wordmark}>
+            <LeafMark />
+            <Text style={styles.brand}>
+              {brand.wordmarkPrefix}
+              <Text style={{ color: colors.primaryDark }}>{brand.wordmarkSuffix}</Text>
+            </Text>
+          </View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Abrir perfil"
+            onPress={() => router.push('/profile')}
+            style={styles.avatar}
+          >
+            <Ionicons name="person" size={20} color={colors.primaryDark} />
+          </Pressable>
         </View>
-        <SearchBar
-          value={search}
-          onChangeText={setSearch}
-          onSubmit={() => router.push({ pathname: '/green-points', params: { q: search } })}
+        <View style={styles.intro}>
+          <View style={{ flex: 1, zIndex: 1 }}>
+            <Text style={styles.greeting}>
+              ¡Hola, {profile?.fullName.split(' ')[0] || 'visitante'}!
+            </Text>
+            <Text style={styles.description}>
+              Gracias por ser parte de un{'\n'}mundo más limpio y responsable.
+            </Text>
+          </View>
+          <View pointerEvents="none" style={styles.ecology}>
+            <HomeBotanical />
+          </View>
+        </View>
+        <PointsCard
+          guest={!session}
+          points={wallet.data?.points ?? null}
+          loading={!!session && wallet.loading}
+          error={wallet.error}
+          onPress={() => (wallet.error ? void refreshWallet() : router.push('/my-points'))}
         />
-        <Text style={styles.sectionTitle}>Puntos verdes</Text>
+        <View style={styles.quickGrid}>
+          <QuickAccess
+            title="Entregas"
+            icon={<MaterialCommunityIcons name="recycle" size={27} color={colors.primaryDark} />}
+            onPress={() => router.push('/my-raee')}
+          />
+          <QuickAccess
+            title="Mis puntos"
+            icon={<Ionicons name="bar-chart" size={25} color={colors.primaryDark} />}
+            onPress={() => router.push('/my-points')}
+          />
+          <QuickAccess
+            title="Premios"
+            icon={<Ionicons name="gift-outline" size={26} color={colors.primaryDark} />}
+            onPress={() => router.push('/rewards')}
+          />
+          <QuickAccess
+            title="Impacto"
+            icon={<Ionicons name="leaf" size={26} color={colors.primaryDark} />}
+            onPress={() => router.push('/impact')}
+          />
+        </View>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Puntos verdes</Text>
+          <PortalLink title="Ver todos ›" onPress={() => router.push('/green-points')} />
+        </View>
         {loading || error ? (
           <DiscoveryState loading={loading} error={error} retry={refresh} />
         ) : (
-          <>
+          <View style={styles.mapCard}>
             <PointsMap points={sorted} location={location} preview onSelect={openPoint} />
-            {sorted.length === 0 ? (
+            {sorted.length ? (
+              <PointRow
+                point={sorted[0]}
+                location={location}
+                now={now}
+                onPress={() => openPoint(sorted[0])}
+              />
+            ) : (
               <DiscoveryState
                 loading={false}
                 error={null}
                 retry={refresh}
-                empty="Todavía no hay puntos verdes publicados. Podés consultar qué dispositivos recibimos."
+                empty="Todavía no hay puntos verdes publicados en la red."
               />
-            ) : (
-              <>
-                <Text style={styles.nearest}>
-                  {location ? 'El más cercano a vos' : 'Explorá un punto verde'}
-                </Text>
-                <PointRow
-                  point={sorted[0]}
-                  location={location}
-                  now={now}
-                  onPress={() => openPoint(sorted[0])}
-                />
-              </>
             )}
             {!location && (
               <ActionButton
-                title="Usar mi ubicación"
+                title="Encontrar cerca de mí"
                 secondary
                 loading={locating}
                 onPress={() => void requestLocation()}
@@ -89,40 +153,22 @@ export default function HomeScreen() {
                 {locationError}
               </Text>
             )}
-            <ActionButton
-              title="Ver todos los puntos"
-              secondary
-              onPress={() => router.push('/green-points')}
-            />
-          </>
+          </View>
         )}
-        <Text style={styles.sectionTitle}>Accesos rápidos</Text>
-        <View style={styles.quickGrid}>
-          <QuickAccess
-            title={'Qué\nrecibimos'}
-            icon={<Ionicons name="hardware-chip-outline" size={26} color={colors.text} />}
-            onPress={() => router.push('/device-categories')}
-          />
-          <QuickAccess
-            title={'Registrar\nentrega'}
-            icon={<Ionicons name="clipboard-outline" size={26} color={colors.text} />}
-            onPress={() => router.push('/new-delivery')}
-          />
-          <QuickAccess
-            title={'Solicitar\nretiro'}
-            icon={<MaterialCommunityIcons name="truck-outline" size={26} color={colors.text} />}
-            onPress={() => router.push('/my-raee')}
-          />
-          <QuickAccess
-            title="Recompensas"
-            icon={<Ionicons name="star-outline" size={26} color={colors.text} />}
-            onPress={() => router.push('/rewards')}
-          />
-        </View>
-        <PortalLink
-          title="Registrar una organización"
-          onPress={() => router.push('/company-application')}
-        />
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => router.push('/impact')}
+          style={styles.impact}
+        >
+          <ImpactPlant />
+          <View style={{ flex: 1, gap: 4 }}>
+            <Text style={styles.impactTitle}>Pequeñas acciones,{'\n'}grandes cambios</Text>
+            <Text style={styles.impactHint}>
+              Tus entregas de RAEE ayudan{'\n'}a un futuro más verde.
+            </Text>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color={colors.primaryDark} />
+        </Pressable>
       </ScrollView>
     </SafeAreaView>
   );
@@ -133,20 +179,65 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 720,
     alignSelf: 'center',
-    padding: 24,
+    padding: 20,
     gap: 16,
-    paddingBottom: 32,
+    paddingBottom: 28,
   },
-  brand: { fontFamily: fonts.bold, color: colors.primary, fontSize: 22 },
-  intro: { gap: 8, paddingVertical: 8 },
-  greeting: { fontFamily: fonts.bold, fontSize: 28, color: colors.text },
-  description: { fontFamily: fonts.regular, fontSize: 15, lineHeight: 22, color: colors.brandDark },
-  sectionTitle: { fontFamily: fonts.semiBold, fontSize: 19, color: colors.text },
-  nearest: { fontFamily: fonts.semiBold, fontSize: 16, color: colors.primary, marginTop: 4 },
-  quickGrid: {
+  header: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
+    alignItems: 'center',
     justifyContent: 'space-between',
-    rowGap: 20,
+    paddingVertical: 8,
+  },
+  wordmark: { flexDirection: 'row', alignItems: 'center', gap: 9 },
+  brand: { fontFamily: fonts.bold, color: colors.text, fontSize: 25, letterSpacing: -0.7 },
+  avatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#DCEBE0',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  intro: { flexDirection: 'row', minHeight: 106, paddingTop: 12, justifyContent: 'space-between' },
+  ecology: { position: 'absolute', right: -20, bottom: -24, opacity: 0.8 },
+  greeting: { fontFamily: fonts.bold, fontSize: 27, color: colors.text, letterSpacing: -0.6 },
+  description: {
+    fontFamily: fonts.regular,
+    fontSize: 15,
+    lineHeight: 20,
+    color: colors.textSecondary,
+    marginTop: 6,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: -10,
+  },
+  sectionTitle: { fontFamily: fonts.bold, fontSize: 20, color: colors.text },
+  quickGrid: { flexDirection: 'row', gap: 10 },
+  mapCard: {
+    backgroundColor: colors.surface,
+    padding: 8,
+    borderRadius: 18,
+    gap: 10,
+    overflow: 'hidden',
+    boxShadow: '0 5px 18px rgba(31,75,48,0.07)',
+  },
+  impact: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: colors.primarySoft,
+    borderRadius: 18,
+    padding: 16,
+  },
+  impactTitle: { fontFamily: fonts.semiBold, fontSize: 15, lineHeight: 20, color: colors.text },
+  impactHint: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    lineHeight: 17,
+    color: colors.textSecondary,
   },
 });
